@@ -46,6 +46,6 @@
 
 @code {
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
-    [Parameter] public ArtPortfolio.ArtItem Item { get; set; }
+    [Parameter] public WorkshopBoard.ArtItem Item { get; set; }
     void Close() => MudDialog.Close(DialogResult.Ok(true));
 }

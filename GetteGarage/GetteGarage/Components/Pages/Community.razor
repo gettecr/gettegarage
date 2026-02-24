@@ -1,0 +1,72 @@
+@page "/community"
+@using GetteGarage.Client.Components.Shared
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8 mb-16">
+    
+    <!-- HUD Header -->
+
+    <GetteGarage.Client.Components.Shared.HUDHeader Title="THE NETWORK" Subtitle="VISITORS AND DISCUSSION"/> 
+
+    <MudGrid>
+        <!-- LEFT COLUMN: Badges & Webrings -->
+        <MudItem xs="12" md="5">
+            
+            <MudPaper Class="pa-6" Style="background: rgba(0,0,0,0.3); border: 1px dashed #cf4024; height: 100%;">
+                <MudText Typo="Typo.h6" Color="Color.Secondary" Class="mb-4" Style="font-family: 'Press Start 2P'; font-size: 0.8rem;">
+                    /// DIRECTORY
+                </MudText>
+                <MudText Typo="Typo.body2" Class="mb-6" Style="font-family: 'Rajdhani'; color: #888;">
+                    Other garages, labs, and studios on the open web.
+                </MudText>
+
+                <!-- 88x31 Button Wall -->
+                <div class="button-wall mb-8">
+                    <!-- Placeholder Godot Link -->
+                    <a href="https://godotengine.org" target="_blank">
+                        <img src="https://godotengine.org/assets/press/logo_small_color_dark.svg" style="background:#333;" />
+                    </a>
+                    <!-- Add more 88x31 buttons here as you trade them! -->
+                </div>
+
+                <MudDivider Class="mb-6" />
+
+                <!-- Share Your Button -->
+                <MudText Typo="Typo.subtitle2" Color="Color.Primary" Class="mb-2" Style="font-family: 'Press Start 2P'; font-size: 0.6rem;">
+                    LINK TO GETTE GARAGE
+                </MudText>
+                <div class="d-flex flex-column gap-2">
+                    <img src="/images/GetteGarageLogo_favicon.png" style="width:32px; height:32px; border:1px solid #f6a91f;" alt="Gette Garage Logo" />
+                    <code style="background: #050510; color: #00ff00; padding: 8px; font-size: 0.6rem; border: 1px solid #333; overflow-x: auto;">
+                        &lt;a href="https://gettegarage.com"&gt;&lt;img src="https://gettegarage.com/GetteGarageLogo_favicon.png" alt="Gette Garage"&gt;&lt;/a&gt;
+                    </code>
+                </div>
+            </MudPaper>
+        </MudItem>
+
+        <!-- RIGHT COLUMN: The Guestbook -->
+        <MudItem xs="12" md="7">
+            <!-- Giscus Component -->
+            <CommentsSection Topic="GUESTBOOK" />
+        </MudItem>
+    </MudGrid>
+
+</MudContainer>
+
+<style>
+    .button-wall {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .button-wall img {
+        width: 88px;
+        height: 31px;
+        image-rendering: pixelated;
+        border: 1px solid #333;
+        transition: transform 0.1s;
+    }
+    .button-wall img:hover {
+        transform: scale(1.1);
+        border-color: #f6a91f;
+    }
+</style>

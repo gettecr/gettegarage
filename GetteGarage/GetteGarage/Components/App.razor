@@ -12,6 +12,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
     <HeadOutlet />
+    <title>Gette Garage | Indie Game Studio</title>
+    <meta name="title" content="Gette Garage | Indie Game Studio">
+    <meta name="description" content="The digital workshop of Dr. Gette. Building interactive worlds with Godot and .NET.">
+
+    <!-- Open Graph / Facebook / Discord -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gettegarage.com/">
+    <meta property="og:title" content="Gette Garage">
+    <meta property="og:description" content="Play the games, read the logs, and check the prototypes.">
+    <meta property="og:image" content="https://gettegarage.com/images/social_preview.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:image" content="https://gettegarage.com/images/social_preview.png">
+    
 </head>
 
 <body>
@@ -69,6 +84,13 @@
                 window.applyCrtFromStorage();
             });
         }
+
+        window.scrollToElement = (elementId) => {
+        var element = document.getElementById(elementId);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
     </script>
 
 </body>

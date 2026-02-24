@@ -37,8 +37,8 @@
                 <MudButton Href="/workshop" Color="Color.Inherit" Variant="Variant.Text">WORKSHOP</MudButton>
                 <MudButton Href="/blog" Color="Color.Inherit" Variant="Variant.Text">DEV_LOG</MudButton>
                 <MudButton Href="/arcade" Color="Color.Inherit" Variant="Variant.Text">ARCADE</MudButton>
-                <MudButton Href="/gallery" Color="Color.Inherit" Variant="Variant.Text">GALLERY</MudButton>
                 <MudButton Href="/about" Color="Color.Inherit" Variant="Variant.Text">CREDITS</MudButton>
+                <MudButton Href="/community" Color="Color.Inherit" Variant="Variant.Text">NETWORK</MudButton>
                 <GetteGarage.Client.Components.Shared.LiveSignalWidget />
             </div>
             
@@ -164,8 +164,8 @@
         if (uri.Contains("/workshop")) return "WORKSHOP";
         if (uri.Contains("/blog")) return "DEV_LOG";
         if (uri.Contains("/arcade")) return "ARCADE";
-        if (uri.Contains("/gallery")) return "GALLERY";
         if (uri.Contains("/about")) return "CREDITS";
+        if (uri.Contains("/community")) return "NETWORK";
         
         return "HOME";
     }

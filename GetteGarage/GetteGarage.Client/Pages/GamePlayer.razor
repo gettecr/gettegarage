@@ -1,5 +1,6 @@
 @page "/play/{GameSlug}"
 @rendermode InteractiveWebAssembly
+@using GetteGarage.Client.Components.Shared
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
 
@@ -28,6 +29,8 @@
             <b>Controls:</b> Click inside the game window to focus. If the game captures your mouse, press <b>ESC</b> to release.
         </MudText>
     </MudAlert>
+
+    <CommentsSection Topic="@FormatTitle(GameSlug).ToUpper()" />
 
 </MudContainer>
 
