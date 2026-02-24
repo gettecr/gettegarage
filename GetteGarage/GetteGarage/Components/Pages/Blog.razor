@@ -1,0 +1,155 @@
+@page "/blog"
+@using GetteGarage.Services
+@inject BlogService BlogService
+@attribute [StreamRendering]
+
+<PageTitle>Blog</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+    <GetteGarage.Client.Components.Shared.HUDHeader Title="LATEST POSTS" Subtitle="ENABLE OVER-ENGINEERING"/>   
+    
+    @if (posts == null)
+    {
+        <div class="d-flex justify-center mt-12">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+        </div>
+    }
+    else if (!posts.Any())
+    {
+        <MudText Align="Align.Center">No logs found.</MudText>
+    }
+    else
+    {
+        <!-- 1. THE HERO CARD (Latest Post) -->
+        var heroPost = posts.First();
+        
+        <MudCard Elevation="4" Class="hero-card mb-12">
+            <MudGrid Spacing="0">
+                <!-- Image Half -->
+                <MudItem xs="12" md="7">
+                    <div class="hero-image" style="background-image: url('@(string.IsNullOrEmpty(heroPost.ImageUrl) ? "/images/placeholder.jpg" : heroPost.ImageUrl)');">
+                        <div class="hero-overlay">
+                            <MudChip T="string" Color="Color.Secondary" Size="Size.Small" Variant="Variant.Filled" Class="press-start-chip">LATEST</MudChip>
+                        </div>
+                    </div>
+                </MudItem>
+                
+                <!-- Text Half -->
+                <MudItem xs="12" md="5" Class="d-flex flex-column pa-6" Style="background: #0a0a1f;">
+                    <MudText Typo="Typo.caption" Color="Color.Primary" Style="font-family: monospace;">
+                        @heroPost.PubDate.ToString("yyyy.MM.dd")
+                    </MudText>
+                    <MudText Typo="Typo.h4" Color="Color.Secondary" Class="mt-2 mb-4" Style="font-family: 'Rajdhani'; font-weight: bold; line-height: 1.2;">
+                        @heroPost.Title
+                    </MudText>
+                    
+                    <!-- We use Summary here, truncated if necessary -->
+                    <MudText Typo="Typo.body1" Class="mb-6 flex-grow-1" Style="color: #aaa; font-family: 'Rajdhani';">
+                        @GetSnippet(heroPost.Summary, 200)
+                    </MudText>
+                    
+                    <div class="mt-auto">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@($"/blog/{heroPost.Slug}")" FullWidth="true" Class="press-start-chip py-3">
+                            READ HERE
+                        </MudButton>
+                    </div>
+                </MudItem>
+            </MudGrid>
+        </MudCard>
+
+        <!-- 2. THE GRID (Older Posts) -->
+        <MudGrid Spacing="4">
+            @foreach (var post in posts.Skip(1))
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Class="grid-card d-flex flex-column" Elevation="2">
+                        
+                        <MudCardMedia Image="@(string.IsNullOrEmpty(post.ImageUrl) ? "/images/placeholder.jpg" : post.ImageUrl)" Height="180" />
+                        
+                        <MudCardContent Class="flex-grow-1">
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="font-family: monospace;">
+                                @post.PubDate.ToString("yyyy.MM.dd")
+                            </MudText>
+                            <MudText Typo="Typo.h6" Class="mt-1 mb-2" Style="font-family: 'Rajdhani'; font-weight: bold; line-height: 1.2;">
+                                @post.Title
+                            </MudText>
+                            <MudText Typo="Typo.body2" Style="color: #888;">
+                                @GetSnippet(post.Summary, 100)
+                            </MudText>
+                        </MudCardContent>
+                        
+                        <MudCardActions Class="pa-4 pt-0">
+                            <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="@($"/blog/{post.Slug}")" Size="Size.Small">
+                                OPEN
+                            </MudButton>
+                            <MudSpacer />
+                            <MudIconButton Icon="@Icons.Material.Filled.OpenInNew" Color="Color.Default" Href="@post.Link" Target="_blank" Size="Size.Small" Title="View on Substack" />
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+</MudContainer>
+
+<style>
+    /* Hero Card Styling */
+    .hero-card {
+        border: 1px solid #333;
+        overflow: hidden;
+        background: #050510;
+        transition: border-color 0.3s;
+    }
+    .hero-card:hover {
+        border-color: #f6a91f;
+    }
+    .hero-image {
+        height: 100%;
+        min-height: 300px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        border-right: 1px solid #333;
+    }
+    .hero-overlay {
+        position: absolute;
+        top: 16px; left: 16px;
+    }
+
+    /* Grid Card Styling */
+    .grid-card {
+        height: 100%;
+        background: #0a0a1f;
+        border: 1px solid #222;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .grid-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        border-color: #cf4024;
+    }
+
+    .press-start-chip { font-family: 'Press Start 2P', cursive; font-size: 0.6rem; letter-spacing: 1px; }
+</style>
+
+@code {
+    private List<BlogPost>? posts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        posts = await BlogService.GetPostsAsync();
+    }
+
+    // Helper to keep summaries a consistent length and strip weird HTML tags
+    private string GetSnippet(string text, int maxLength)
+    {
+        if (string.IsNullOrEmpty(text)) return "";
+        
+        // Very basic HTML tag stripping (since rss2json sometimes leaves <p> tags in the summary)
+        var plainText = System.Text.RegularExpressions.Regex.Replace(text, "<.*?>", string.Empty).Trim();
+        
+        if (plainText.Length <= maxLength) return plainText;
+        return plainText.Substring(0, maxLength) + "...";
+    }
+}
+}

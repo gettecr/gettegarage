@@ -1,0 +1,30 @@
+<!-- HUD Header -->
+<div class="d-flex align-center mb-8">
+    <div>
+        <MudText Typo="Typo.h4" Class="ml-4 game-title" Color="Color.Primary" Style="font-family: 'Press Start 2P'">
+            @Title
+        </MudText>
+        @if (Subtitle != ""){
+            <MudText Typo="Typo.subtitle1" Class="ml-4" Color="Color.Secondary" Style="font-family: 'Rajdhani'">
+                // @Subtitle
+            </MudText>
+        }
+    </div>
+</div>
+
+
+<style>
+
+.game-title {
+    text-align: center;
+    color: #f6a91f; /* Primary Orange */
+    font-family: 'Press Start 2P', cursive;
+    line-height: 1.5;
+    margin-top: 3rem;
+    text-transform: uppercase;
+} 
+</style>
+@code {
+    [Parameter] public string Title {get; set;} = "";
+    [Parameter] public string Subtitle {get; set;} = "";
+}

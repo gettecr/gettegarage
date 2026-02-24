@@ -1,0 +1,32 @@
+@using MudBlazor
+
+<MudPaper Class="legacy-card pa-4">
+    <div class="d-flex align-center mb-2">
+        <MudIcon Icon="@Icons.Material.Filled.Save" Color="Color.Secondary" Size="Size.Small" Class="mr-2"/>
+        <MudText Typo="Typo.subtitle2" Style="color: #888; font-family: monospace;">ARCHIVED_PROJECT</MudText>
+    </div>
+    
+    <MudText Typo="Typo.h6" Color="Color.Primary" Style="font-family: 'Rajdhani'; font-weight: bold;">@Title</MudText>
+    <MudText Typo="Typo.caption" Color="Color.Primary" Style="font-family: monospace;">@Role</MudText>
+    
+    <MudText Typo="Typo.body2" Class="mt-2 text-dim">@Desc</MudText>
+</MudPaper>
+
+<style>
+    .legacy-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px dashed #444;
+        transition: all 0.2s;
+    }
+    .legacy-card:hover {
+        border-color: #cf4024;
+        background: rgba(255, 255, 255, 0.05);
+    }
+    .text-dim { color: #aaa; font-family: 'Rajdhani'; }
+</style>
+
+@code {
+    [Parameter] public string Title { get; set; }
+    [Parameter] public string Role { get; set; }
+    [Parameter] public string Desc { get; set; }
+}

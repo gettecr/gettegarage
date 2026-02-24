@@ -1,0 +1,57 @@
+@page "/blog/{Slug}"
+@using GetteGarage.Services
+@inject BlogService BlogService
+@inject NavigationManager Nav
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8 mb-8">
+    
+    <MudButton StartIcon="@Icons.Material.Filled.ArrowBack" Href="/blog" Class="mb-4">Back to List</MudButton>
+
+    @if (CurrentPost == null)
+    {
+         <div class="d-flex justify-center mt-8">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </div>
+    }
+    else
+    {
+        <MudPaper Elevation="0" Class="pa-4">
+            <MudText Typo="Typo.h3" GutterBottom="true">@CurrentPost.Title</MudText>
+            <MudText Typo="Typo.subtitle2" Class="mb-6" Color="Color.Secondary">
+                Published on @CurrentPost.PubDate.ToLongDateString()
+            </MudText>
+            
+            <MudDivider Class="mb-6"/>
+
+            <div class="blog-content">
+                @((MarkupString)CurrentPost.Content) 
+            </div>
+
+            <MudDivider Class="mt-8 mb-4"/>
+            
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@CurrentPost.Link" Target="_blank">
+                Comment on Substack
+            </MudButton>
+        </MudPaper>
+    }
+</MudContainer>
+
+@code {
+    [Parameter] public string Slug { get; set; }
+    private BlogPost? CurrentPost;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch all posts (RSS feeds don't allow fetching just one by ID usually)
+        var allPosts = await BlogService.GetPostsAsync();
+
+        // Find the one matching the slug
+        CurrentPost = allPosts.FirstOrDefault(p => p.Slug == Slug);
+
+        // If not found, go back to list
+        if (CurrentPost == null)
+        {
+            Nav.NavigateTo("/blog");
+        }
+    }
+}

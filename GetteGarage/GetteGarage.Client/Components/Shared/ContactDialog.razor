@@ -1,0 +1,82 @@
+@using MudBlazor
+@inject IJSRuntime JS
+
+<MudDialog Class="contact-terminal">
+    <DialogContent>
+        <div class="d-flex justify-space-between align-center mb-4">
+            <MudText Typo="Typo.h6" Color="Color.Primary" Style="font-family: 'Press Start 2P'; font-size: 0.8rem;">
+                CONTACT
+            </MudText>
+            <MudIcon Icon="@Icons.Material.Filled.Wifi" Color="Color.Success" Class="pulsing-signal"/>
+        </div>
+
+        <MudText Typo="Typo.body2" Class="mb-6" Style="font-family: 'Rajdhani'; color: #e0e0e0;">
+        Available for freelance work, collaboration, or just chatting about game dev.
+        </MudText>
+
+        <div class="d-flex flex-column gap-3">
+            
+            <!-- Email -->
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" FullWidth="true" Class="contact-btn"
+                       Href="mailto:mc.gettegarage@gmail.com">
+                <MudIcon Icon="@Icons.Material.Filled.Email" Class="mr-3"/> 
+                SEND EMAIL
+            </MudButton>
+
+            <!-- GitHub -->
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true" Class="contact-btn"
+                       Target="_blank" Href="https://github.com/gettecr">
+                <MudIcon Icon="@Icons.Custom.Brands.GitHub" Class="mr-3"/> 
+                GITHUB
+            </MudButton>
+
+            <!-- Itch.io -->
+            <MudButton Variant="Variant.Outlined" Color="Color.Error" FullWidth="true" Class="contact-btn"
+                       Target="_blank" Href="https://itch.io/profile/mosswaffle">
+                <MudIcon Icon="@Icons.Material.Filled.Gamepad" Class="mr-3"/> 
+                ITCH.IO
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined" Color="Color.Success" FullWidth="true" Class="contact-btn"
+                       Target="_blank" Href="https://gettegarage.substack.com/">
+                <MudIcon Icon="@Icons.Material.Filled.Book" Class="mr-3"/> 
+                SUBSTACK
+            </MudButton>
+
+        </div>
+    </DialogContent>
+</MudDialog>
+
+<style>
+    .contact-terminal {
+        background: #050510 !important;
+        border: 2px solid #f6a91f !important;
+        box-shadow: 0 0 20px rgba(246, 169, 31, 0.2) !important;
+        border-radius: 0px !important; /* Sharp edges */
+    }
+
+    .contact-btn {
+        justify-content: flex-start;
+        font-family: 'Press Start 2P';
+        font-size: 0.6rem;
+        padding: 1rem;
+        border-width: 2px;
+        transition: all 0.2s;
+    }
+    .contact-btn:hover {
+        background: rgba(255,255,255,0.1);
+        transform: translateX(10px); /* Slide effect */
+    }
+
+    .pulsing-signal { animation: signal-pulse 2s infinite; }
+    @@keyframes signal-pulse {
+        0% { opacity: 0.2; }
+        50% { opacity: 1; }
+        100% { opacity: 0.2; }
+    }
+</style>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    void Cancel() => MudDialog.Cancel();
+}

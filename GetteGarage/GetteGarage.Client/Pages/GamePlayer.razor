@@ -1,0 +1,52 @@
+@page "/play/{GameSlug}"
+@rendermode InteractiveWebAssembly
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
+
+    <GetteGarage.Client.Components.Shared.HUDHeader Title="@FormatTitle(GameSlug)"/> 
+
+    <!-- The Game Window -->
+    <MudPaper Elevation="4" Class="pa-2" Style="background-color: #000;">
+        <!-- 
+             Aspect Ratio Wrapper: 
+             Maintains 16:9 ratio (padding-bottom: 56.25%).
+             This stops the layout from jumping around.
+        -->
+        <div style="position: relative; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+            <iframe src="@GetGameUrl()"
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
+                    allowfullscreen
+                    allow="autoplay; fullscreen; gamepad" 
+                    title="@GameSlug">
+            </iframe>
+        </div>
+    </MudPaper>
+
+    <!-- Controls / Instructions -->
+    <MudAlert Severity="Severity.Info" Class="mt-4" NoIcon="true">
+        <MudText Typo="Typo.body2">
+            <b>Controls:</b> Click inside the game window to focus. If the game captures your mouse, press <b>ESC</b> to release.
+        </MudText>
+    </MudAlert>
+
+</MudContainer>
+
+
+@code {
+    [Parameter] public string GameSlug { get; set; }
+
+    // Generates the path: /games/super-mario/index.html
+    private string GetGameUrl()
+    {
+        return $"/games/{GameSlug}/index.html";
+    }
+
+    // Helper to make "super-mario" look like "Super Mario"
+    private string FormatTitle(string slug)
+    {
+        if (string.IsNullOrEmpty(slug)) return "Unknown Game";
+        
+        return System.Globalization.CultureInfo.CurrentCulture.TextInfo
+            .ToTitleCase(slug.Replace("-", " "));
+    }
+}

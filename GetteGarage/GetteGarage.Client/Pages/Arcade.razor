@@ -1,0 +1,62 @@
+@page "/arcade"
+@using GetteGarage.Client.Components.Arcade
+@rendermode InteractiveWebAssembly
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8 mb-16">
+    
+    <!-- ARCADE HEADER -->
+    <GetteGarage.Client.Components.Shared.HUDHeader Title="ARCADE" Subtitle="SELECT CARTRIDGE TO PLAY"/> 
+
+    <!-- THE SHELF -->
+    <div class="cartridge-shelf">
+        
+        <GameCartridge 
+            Title="Big Larry's Beach Baseball" 
+            Version="v1.0" 
+            ImageUrl="/art/big_larrys_thumbnail.png" 
+            PlayLink="/play/big-larrys-beach-baseball" 
+            PlasticColorClass="plastic-grey" />
+
+        <GameCartridge 
+            Title="Tidebreaker" 
+            Version="v1.2" 
+            ImageUrl="/art/tidebreaker_thumbnail.png"
+            PlayLink="/play/tidebreaker" 
+            PlasticColorClass="plastic-grey" />
+
+        <!-- Make the Idle Game a Gold Cartridge! -->
+        <GameCartridge 
+            Title="Idle Fishing RPG" 
+            Version="v1.0" 
+            ImageUrl="/art/fishing_cover.png" 
+            PlayLink="#" 
+            PlasticColorClass="plastic-gold" />
+
+    </div>
+
+    <!-- Optional: The physical shelf line -->
+    <div class="shelf-ledge"></div>
+
+</MudContainer>
+
+<style>
+    /* Flexbox layout to align cartridges nicely on a line */
+    .cartridge-shelf {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        align-items: flex-end; /* Keeps them aligned to the bottom shelf */
+        padding-top: 50px; /* Room for the hover lift */
+        padding-bottom: 5px;
+    }
+
+    .shelf-ledge {
+        width: 100%;
+        height: 15px;
+        background: linear-gradient(to bottom, #333 0%, #111 100%);
+        border-top: 2px solid #555;
+        border-radius: 2px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+    }
+</style>

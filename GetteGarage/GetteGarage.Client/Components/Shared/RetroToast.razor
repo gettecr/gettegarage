@@ -1,0 +1,24 @@
+@using MudBlazor
+
+<div class="d-flex flex-column gap-1">
+    <!-- Retro Header -->
+    <MudText Typo="Typo.caption" 
+             Style="font-family: 'Press Start 2P'; color: #f6a91f; font-size: 0.6rem; letter-spacing: 1px;">
+        ACHIEVEMENT UNLOCKED
+    </MudText>
+    
+    <!-- Title -->
+    <MudText Typo="Typo.body2" Style="font-weight: bold; color: #fff;">
+        @Title
+    </MudText>
+    
+    <!-- Description -->
+    <MudText Typo="Typo.caption" Style="color: #e0e0e0; opacity: 0.8;">
+        @Description
+    </MudText>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string Description { get; set; } = "";
+}

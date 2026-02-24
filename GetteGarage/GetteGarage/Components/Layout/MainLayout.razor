@@ -1,0 +1,172 @@
+@inherits LayoutComponentBase
+@using MudBlazor
+@inject NavigationManager Nav
+
+
+<MudThemeProvider Theme="GameTheme" IsDarkMode="true" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
+
+<GetteGarage.Client.Components.InteractiveProviders @rendermode="InteractiveWebAssembly" />
+
+<MudLayout>
+    <GetteGarage.Client.Components.Shared.RetroBackground />
+    
+    <!-- 
+        HUD TOP BAR (Navigation)
+        Hidden on the Home Page ("/") so the Title Screen looks clean.
+    -->
+    @if (Nav.Uri.EndsWith("/") == false)
+    {
+        <MudAppBar Elevation="0" Fixed="true" 
+                   Style="background: rgba(5, 5, 16, 0.9); backdrop-filter: blur(8px); border-bottom: 1px solid #333; height: 64px;">
+            
+            <!-- Home Icon -->
+            <MudIconButton Icon="@Icons.Material.Filled.Home" Color="Color.Primary" Edge="Edge.Start" Href="/" />
+            
+            <!-- Current "OS" Status -->
+            <MudText Typo="Typo.button" Class="ml-4 d-none d-sm-flex" Color="Color.Inherit" Style="font-family: 'Press Start 2P'; font-size: 0.8rem;">
+                GETTEGARAGE // @GetSectionTitle()
+            </MudText>
+
+            <MudSpacer />
+
+            <!-- Desktop Links -->
+            <div class="d-none d-md-flex gap-4">
+                <MudButton Href="/workshop" Color="Color.Inherit" Variant="Variant.Text">WORKSHOP</MudButton>
+                <MudButton Href="/blog" Color="Color.Inherit" Variant="Variant.Text">DEV_LOG</MudButton>
+                <MudButton Href="/arcade" Color="Color.Inherit" Variant="Variant.Text">ARCADE</MudButton>
+                <MudButton Href="/gallery" Color="Color.Inherit" Variant="Variant.Text">GALLERY</MudButton>
+                <MudButton Href="/about" Color="Color.Inherit" Variant="Variant.Text">CREDITS</MudButton>
+                <GetteGarage.Client.Components.Shared.LiveSignalWidget />
+            </div>
+            
+
+        </MudAppBar>
+    }
+
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+
+    
+    <GetteGarage.Client.Components.Terminal />
+    <GetteGarage.Client.Components.IdleGame.GlobalIdleGame />
+    <GetteGarage.Client.Components.Shared.GlobalContact /> 
+    <GetteGarage.Client.Components.Shared.KonamiListener />
+
+    <MudAppBar Bottom="true" Fixed="true" Elevation="0" 
+           Style="background: #000; border-top: 1px solid #333; height: 30px; min-height: 30px;">
+    
+        <MudText Typo="Typo.caption" Color="Color.Secondary" Style="font-family: 'Press Start 2P'; font-size: 0.5rem;">
+            VER: 1.0.0
+        </MudText>
+        
+        
+        <MudSpacer />
+        
+        <div class="d-flex gap-4">
+            
+            <MudText Typo="Typo.caption" Style="color:#888; font-family: monospace;">
+                MEMORY: @(GC.GetTotalMemory(false) / 1024 / 1024)MB
+            </MudText>
+            <MudText Typo="Typo.caption" Style="color:#888; font-family: monospace;">
+                RENDER: WASM
+            </MudText>
+            
+            <MudText Typo="Typo.caption" Style="color:#f6a91f; font-family: monospace;">
+                © @DateTime.Now.Year GETTE GARAGE
+            </MudText>
+        </div>
+
+    </MudAppBar>
+
+</MudLayout>
+
+<!-- GLOBAL STYLES FOR THE LAYOUT -->
+<style>
+    /* Pulsing Green Dot for the HUD */
+    .pulsing-dot {
+        width: 8px; height: 8px; background: #00ff00; border-radius: 50%;
+        box-shadow: 0 0 5px #00ff00;
+        animation: hud-pulse 2s infinite;
+    }
+    @@keyframes hud-pulse {
+        0% { opacity: 1; box-shadow: 0 0 5px #00ff00; }
+        50% { opacity: 0.5; box-shadow: 0 0 0px #00ff00; }
+        100% { opacity: 1; box-shadow: 0 0 5px #00ff00; }
+    }
+</style>
+
+@code {
+    
+    private MudTheme GameTheme = CreateGameTheme();
+
+    private static MudTheme CreateGameTheme()
+    {
+        var theme = new MudTheme();
+
+        theme.PaletteDark = new PaletteDark()
+        {
+            Primary = "#f6a91f",      // Retro Orange
+            Secondary = "#cf4024",    // Burnt Red/Orange
+            Success = "#f6a91f",      // Match Primary for consistency
+            Background = "#121324",   
+            Surface = "#2d2e45",      // Lighter Slate
+            AppbarBackground = "#000000",
+            TextPrimary = "#e0e0e0",
+            Tertiary = "#2ecc71",
+            
+            
+            // Make the drawer/menus match the surface
+            DrawerBackground = "#2d2e45", 
+            ActionDefault = "#f6a91f" 
+        };
+        
+
+        
+        var hudFont = new[] { "Rajdhani", "sans-serif" };
+        var pixelFont = new[] { "Press Start 2P", "cursive" };
+
+        theme.Typography.Default.FontFamily = hudFont;
+        
+        theme.Typography.H1.FontFamily = pixelFont;
+        theme.Typography.H1.LineHeight = "1.5";
+
+        theme.Typography.H2.FontFamily = pixelFont;
+        theme.Typography.H2.LineHeight = "1.5";
+
+        theme.Typography.H3.FontFamily = pixelFont;
+        theme.Typography.H3.LineHeight = "1.5";
+
+        theme.Typography.H4.FontFamily = pixelFont;
+        theme.Typography.H4.LineHeight = "1.5";
+
+        theme.Typography.H5.FontFamily = pixelFont;
+        theme.Typography.H5.LineHeight = "1.5";
+
+        theme.Typography.H6.FontFamily = pixelFont;
+        theme.Typography.H6.LineHeight = "1.5";
+
+        theme.Typography.Button.FontFamily = pixelFont;
+        theme.Typography.Button.FontSize = ".7rem";
+
+        return theme;
+    }
+
+    private string GetSectionTitle()
+    {
+        if (Nav == null) return "LOADING...";
+        
+        // Simple logic to change the "OS" title based on URL
+        var uri = Nav.Uri.ToLower();
+        if (uri.Contains("/workshop")) return "WORKSHOP";
+        if (uri.Contains("/blog")) return "DEV_LOG";
+        if (uri.Contains("/arcade")) return "ARCADE";
+        if (uri.Contains("/gallery")) return "GALLERY";
+        if (uri.Contains("/about")) return "CREDITS";
+        
+        return "HOME";
+    }
+}

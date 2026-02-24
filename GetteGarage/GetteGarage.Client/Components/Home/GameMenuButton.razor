@@ -1,0 +1,90 @@
+@inject IJSRuntime JS
+
+<!-- 
+    CHANGE: Use an <a> tag instead of <div>.
+    This ensures navigation works even on Static (Server) pages.
+-->
+<a href="@Link" class="game-btn-wrapper" style="animation-delay: @Delay" 
+   @onmouseenter="PlayHover" 
+   @onclick="PlayClick">
+    
+    <div class="game-btn-bar"></div>
+    <div class="game-btn-content">
+        <div class="game-btn-title">@Title</div>
+        <div class="game-btn-sub">@Subtitle</div>
+    </div>
+</a>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Menu Item";
+    [Parameter] public string Subtitle { get; set; } = "";
+    [Parameter] public string Link { get; set; } = "#";
+    [Parameter] public string Delay { get; set; } = "0s";
+
+    private async Task PlayHover()
+    {
+        // Only plays if Interactivity is active (WASM is loaded)
+        try { await JS.InvokeVoidAsync("playSound", "hover.mp3"); } catch {}
+    }
+
+    private async Task PlayClick()
+    {
+        // Only plays if Interactivity is active
+        try { await JS.InvokeVoidAsync("playSound", "click.mp3"); } catch {}
+    }
+}
+
+<style>
+    /* Reset default link styles so it looks like a button */
+     a.game-btn-wrapper {
+        text-decoration: none;
+        display: inline-block; /* Changed from block to inline-block for horizontal row */
+        margin-bottom: 0;      /* Remove bottom margin */
+    }
+
+    .game-btn-wrapper {
+        position: relative;
+        cursor: pointer;
+        opacity: 0;
+        animation: slideIn 0.5s forwards;
+        margin-bottom: 1rem;
+    }
+
+    .game-btn-content {
+        padding: 10px 20px;
+        border-left: 4px solid #333;
+        transition: all 0.2s ease;
+        background: linear-gradient(90deg, transparent, transparent);
+    }
+
+    .game-btn-title { 
+        font-family: 'Press Start 2P', cursive; 
+        font-size: 1.2rem; 
+        color: #e0681c; 
+        margin-bottom: 5px;
+    }
+    
+    .game-btn-sub { 
+        font-family: 'Rajdhani', sans-serif; 
+        font-size: 1rem; 
+        color: #888; 
+        text-transform: uppercase; 
+        letter-spacing: 2px; 
+    }
+
+    .game-btn-wrapper:hover .game-btn-content {
+        border-left: 4px solid #f6a91f;
+        background: linear-gradient(90deg, rgba(255, 208, 0, 0.1), transparent);
+        padding-left: 30px;
+    }
+    
+    .game-btn-wrapper:hover .game-btn-title { 
+        color: #f6a91f; 
+        text-shadow: 0 0 8px rgba(2, 9, 85, 0.711); 
+    }
+
+    @@keyframes slideIn { 
+        from { transform: translateX(-50px); opacity: 0; } 
+        to { transform: translateX(0); opacity: 1; } 
+    }
+</style>

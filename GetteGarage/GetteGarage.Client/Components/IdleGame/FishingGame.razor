@@ -1,0 +1,391 @@
+@implements IDisposable
+@using System.Threading
+@using Blazored.LocalStorage
+@inject ILocalStorageService LocalStorage
+@inject IJSRuntime JS
+
+<MudCard Elevation="3" Class="pa-0" Style="border: 2px solid #2d2e45; background: #050510; overflow: hidden; width: 100%;">
+    
+    <!-- 1. THE GAME VIEWPORT (Visuals) -->
+    <div class="game-viewport">
+        <!-- Sky & Sun -->
+        <div class="sky">
+            <div class="sun"></div>
+            <div class="cloud" style="top: 10px; left: 20px;"></div>
+            <div class="cloud" style="top: 30px; left: 180px;"></div>
+        </div>
+
+        <!-- Water -->
+        <div class="water"></div>
+
+        <!-- The Fisherman (CSS or Image) -->
+        <div class="fisherman @(_isCasting ? "cast-pose" : "")">
+             <!-- Use an <img> here if you have assets. Using Emoji for demo. -->
+             <span style="font-size: 3rem;">@(_isCasting ? "🎣" : "🧍")</span>
+        </div>
+
+        <!-- The Bobber -->
+        @if (_gameState != GameState.Idle)
+        {
+            <div class="bobber @(_gameState == GameState.Biting ? "bobber-sink" : "bobber-float")" 
+                 style="left: @(_bobberX)%;">
+                 🔴
+            </div>
+        }
+
+        <!-- Splash / Catch Effect -->
+        @if (_showSplash)
+        {
+            <div class="splash-effect" style="left: @(_bobberX)%">💦 +@LastCatchValue</div>
+        }
+    </div>
+
+    <!-- 2. UI / CONTROLS -->
+    <MudCardContent Class="pa-3">
+        
+        <!-- Stats Header -->
+        <div class="d-flex justify-space-between align-center mb-2">
+            <MudText Typo="Typo.h6" Style="font-family: 'Press Start 2P'; color: #f6a91f; font-size: 0.8rem;">
+                FISH: @Math.Floor(FishCount).ToString("N0")
+            </MudText>
+            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">
+                @($"{FishPerSecond:F1}/s")
+            </MudChip>
+        </div>
+
+        <!-- MAIN ACTION BUTTON -->
+        <!-- The text and color change based on game state -->
+        <MudButton Variant="Variant.Filled" 
+                   Color="@GetButtonColor()" 
+                   FullWidth="true" 
+                   Class="py-3 mb-3 press-start-font bounce-on-click"
+                   OnClick="HandleMainAction">
+            @GetButtonText()
+        </MudButton>
+
+        <!-- SHOP / UPGRADES -->
+        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-1 d-block">GEAR SHOP</MudText>
+        <div class="upgrade-list custom-scroll">
+            @foreach (var item in Upgrades)
+            {
+                if (item.IsUnlocked)
+                {
+                    <div class="d-flex justify-space-between align-center mb-2 pa-2 rounded" style="background: rgba(255,255,255,0.05);">
+                        <div>
+                            <div class="d-flex align-center">
+                                <span class="mr-2">@item.Icon</span>
+                                <MudText Typo="Typo.body2" Style="font-weight:bold;">@item.Name</MudText>
+                            </div>
+                            <MudText Typo="Typo.caption" Style="color:#888;">
+                                Lvl @item.Level (+@item.PowerDesc)
+                            </MudText>
+                        </div>
+                        <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Success"
+                                   Disabled="@(FishCount < item.CurrentCost)"
+                                   OnClick="() => BuyUpgrade(item)">
+                            @item.CurrentCost.ToString("N0")
+                        </MudButton>
+                    </div>
+                }
+            }
+        </div>
+
+    </MudCardContent>
+</MudCard>
+
+<style>
+    .game-viewport {
+        position: relative;
+        height: 180px;
+        width: 100%;
+        background: linear-gradient(to bottom, #87CEEB 0%, #E0F7FA 60%, #006994 60%, #003366 100%);
+        overflow: hidden;
+        border-bottom: 4px solid #111;
+    }
+    
+    .water {
+        position: absolute; bottom: 0; width: 100%; height: 40%;
+        background: rgba(0,0,255,0.1);
+        animation: wave 3s infinite linear;
+    }
+
+    .fisherman {
+        position: absolute; bottom: 35%; left: 10%;
+        transition: transform 0.2s;
+    }
+    .cast-pose { transform: rotate(-10deg) translateY(5px); }
+
+    .bobber {
+        position: absolute; bottom: 35%; font-size: 1.2rem;
+        transition: bottom 0.2s;
+    }
+    .bobber-float { animation: bob 2s infinite ease-in-out; }
+    .bobber-sink { bottom: 20% !important; animation: shake 0.1s infinite; }
+
+    .splash-effect {
+        position: absolute; bottom: 40%; 
+        font-weight: bold; color: white; text-shadow: 2px 2px black;
+        animation: floatUp 1s forwards;
+    }
+
+    .upgrade-list { max-height: 150px; overflow-y: auto; }
+    .custom-scroll::-webkit-scrollbar { width: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #444; }
+    
+    .press-start-font { font-family: 'Press Start 2P', cursive; }
+    .bounce-on-click:active { transform: scale(0.95); }
+
+    @@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+    @@keyframes shake { 0% { transform: translateX(-2px); } 100% { transform: translateX(2px); } }
+    @@keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-30px); } }
+</style>
+
+@code {
+    // --- GAME CONSTANTS ---
+    enum GameState { Idle, Casting, Waiting, Biting, Success }
+    private GameState _gameState = GameState.Idle;
+    
+    // --- STATE ---
+    private double FishCount = 0;
+    private double LifetimeFish = 0;
+    private double LastCatchValue = 0;
+    
+    // Visual State
+    private bool _isCasting = false;
+    private bool _showSplash = false;
+    private int _bobberX = 50; // Horizontal position %
+    
+    // Logic Timers
+    private Timer? _gameLoopTimer;
+    private Timer? _actionTimer;
+    private CancellationTokenSource? _biteCts; // To cancel the bite window
+
+    private List<UpgradeItem> Upgrades = new();
+
+    // Stats
+    private double RodPower => 1 + Upgrades.Where(u => u.Type == UpgradeType.Rod).Sum(u => u.Level * u.PowerBase);
+    private double FishPerSecond => Upgrades.Where(u => u.Type == UpgradeType.Net).Sum(u => u.Level * u.PowerBase);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            InitializeUpgrades();
+            await LoadGame();
+            _gameLoopTimer = new Timer(PassiveLoop, null, 0, 100); // Run nets every 100ms
+        }
+    }
+
+    // --- MAIN GAMEPLAY LOOP ---
+
+    private void HandleMainAction()
+    {
+        switch (_gameState)
+        {
+            case GameState.Idle:
+                CastLine();
+                break;
+            case GameState.Waiting:
+                // Pulled too early!
+                CancelCast("Too early!");
+                break;
+            case GameState.Biting:
+                CatchFish();
+                break;
+        }
+    }
+
+    private async void CastLine()
+    {
+        _gameState = GameState.Casting;
+        _isCasting = true;
+        _bobberX = new Random().Next(40, 80); // Random cast distance
+        PlaySound("throw.mp3"); // You need to add this sound!
+        
+        await Task.Delay(500); // Cast animation time
+        
+        _gameState = GameState.Waiting;
+        _isCasting = false;
+        StateHasChanged();
+
+        // Wait random time for a bite (2s to 5s)
+        int waitTime = new Random().Next(2000, 5000);
+        _actionTimer = new Timer(_ => TriggerBite(), null, waitTime, Timeout.Infinite);
+    }
+
+    private void TriggerBite()
+    {
+        if (_gameState != GameState.Waiting) return;
+
+        _gameState = GameState.Biting;
+        PlaySound("splash.mp3");
+        InvokeAsync(StateHasChanged);
+
+        // Player has 1.5 seconds to click!
+        _biteCts = new CancellationTokenSource();
+        Task.Delay(1500, _biteCts.Token).ContinueWith(t => 
+        {
+            if (!t.IsCanceled && _gameState == GameState.Biting)
+            {
+                CancelCast("Fish got away...");
+            }
+        });
+    }
+
+    private void CatchFish()
+    {
+        _biteCts?.Cancel();
+        
+        // Calculate Catch
+        double baseFish = 10;
+        double catchAmount = baseFish * RodPower;
+        
+        FishCount += catchAmount;
+        LifetimeFish += catchAmount;
+        LastCatchValue = catchAmount;
+
+        // Visuals
+        _gameState = GameState.Idle;
+        _showSplash = true;
+        PlaySound("coin.mp3");
+        
+        // Reset splash after animation
+        Task.Delay(1000).ContinueWith(_ => { _showSplash = false; InvokeAsync(StateHasChanged); });
+        
+        _ = SaveGame();
+        StateHasChanged();
+    }
+
+    private void CancelCast(string reason)
+    {
+        _biteCts?.Cancel();
+        _gameState = GameState.Idle;
+        // Optional: Show error toast here
+        StateHasChanged();
+    }
+
+    // --- PASSIVE LOOP (Run Nets) ---
+    private void PassiveLoop(object? state)
+    {
+        if (FishPerSecond > 0)
+        {
+            double earned = FishPerSecond / 10.0;
+            FishCount += earned;
+            LifetimeFish += earned;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    // --- HELPERS ---
+    private string GetButtonText()
+    {
+        return _gameState switch
+        {
+            GameState.Idle => "CAST LINE",
+            GameState.Casting => "CASTING...",
+            GameState.Waiting => "WAIT...",
+            GameState.Biting => "REEL IN!!!",
+            _ => "..."
+        };
+    }
+
+    private Color GetButtonColor()
+    {
+        return _gameState switch
+        {
+            GameState.Idle => Color.Primary,
+            GameState.Waiting => Color.Surface, // Dimmed
+            GameState.Biting => Color.Error, // Red/Urgent
+            _ => Color.Primary
+        };
+    }
+    
+    private void PlaySound(string file)
+    {
+        // Try/Catch for if JS isn't ready
+        try { JS.InvokeVoidAsync("playSound", file); } catch {}
+    }
+
+    private void BuyUpgrade(UpgradeItem item)
+    {
+        if (FishCount >= item.CurrentCost)
+        {
+            FishCount -= item.CurrentCost;
+            item.Level++;
+            item.CurrentCost = Math.Ceiling(item.BaseCost * Math.Pow(1.4, item.Level));
+            PlaySound("buy.mp3");
+            _ = SaveGame();
+        }
+    }
+
+    // --- DATA & SAVING ---
+    private void InitializeUpgrades()
+    {
+        if (Upgrades.Any()) return;
+        Upgrades = new List<UpgradeItem>
+        {
+            new UpgradeItem { Id="worm", Name="Worm Bait", Icon="🪱", Type=UpgradeType.Net, BaseCost=15, CurrentCost=15, PowerBase=1, IsUnlocked=true },
+            new UpgradeItem { Id="rod_fiber", Name="Fiber Rod", Icon="🎣", Type=UpgradeType.Rod, BaseCost=100, CurrentCost=100, PowerBase=2, IsUnlocked=true },
+            new UpgradeItem { Id="net_basic", Name="Basic Net", Icon="🕸️", Type=UpgradeType.Net, BaseCost=500, CurrentCost=500, PowerBase=5, IsUnlocked=true },
+            new UpgradeItem { Id="boat", Name="Fishing Boat", Icon="⛵", Type=UpgradeType.Rod, BaseCost=2000, CurrentCost=2000, PowerBase=10, IsUnlocked=true }
+        };
+    }
+
+    // Save/Load logic is standard (same as previous idle game, just renamed variables)
+    // I'll abbreviate it here for brevity, but you basically map FishCount -> LinesOfCode in the JSON
+    private const string SaveKey = "fish_save_v1";
+
+    private async Task SaveGame()
+    {
+        var data = new SaveData { Fish = FishCount, Lifetime = LifetimeFish, Upgrades = Upgrades };
+        await LocalStorage.SetItemAsync(SaveKey, data);
+    }
+    
+    private async Task LoadGame()
+    {
+        if (await LocalStorage.ContainKeyAsync(SaveKey))
+        {
+            var data = await LocalStorage.GetItemAsync<SaveData>(SaveKey);
+            FishCount = data.Fish;
+            LifetimeFish = data.Lifetime;
+            // Merge upgrades logic...
+            foreach(var u in data.Upgrades) 
+            {
+                var match = Upgrades.FirstOrDefault(x => x.Id == u.Id);
+                if(match != null) { match.Level = u.Level; match.CurrentCost = u.CurrentCost; }
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+        _gameLoopTimer?.Dispose();
+        _actionTimer?.Dispose();
+        _biteCts?.Cancel();
+    }
+
+    // --- MODELS ---
+    public enum UpgradeType { Rod, Net }
+    
+    public class UpgradeItem
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string Icon { get; set; }
+        public UpgradeType Type { get; set; }
+        public int Level { get; set; }
+        public double BaseCost { get; set; }
+        public double CurrentCost { get; set; }
+        public double PowerBase { get; set; }
+        public bool IsUnlocked { get; set; }
+        
+        public string PowerDesc => Type == UpgradeType.Rod ? "Click" : "/sec";
+    }
+
+    public class SaveData
+    {
+        public double Fish { get; set; }
+        public double Lifetime { get; set; }
+        public List<UpgradeItem> Upgrades { get; set; }
+    }
+}

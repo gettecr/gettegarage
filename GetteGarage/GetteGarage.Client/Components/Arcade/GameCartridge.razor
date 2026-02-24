@@ -1,0 +1,229 @@
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<div class="cartridge-wrapper">
+    <!-- The physical plastic shell -->
+    <div class="cartridge-shell @PlasticColorClass" @onclick="InsertCartridge" @onmouseenter="PlayHover">
+        
+        <!-- The molded grip ridges at the top -->
+        <div class="cartridge-ridges"></div>
+        
+        <!-- The indented area for the sticker -->
+        <div class="cartridge-indent">
+            
+            <!-- The glossy sticker -->
+            <div class="cartridge-label">
+                
+                <div class="label-header">
+                    <span style="font-family: 'Press Start 2P'; font-size: 0.4rem;">GETTE GARAGE</span>
+                    <span style="font-family: monospace; font-size: 0.5rem;">@Version</span>
+                </div>
+                
+                <!-- Game Art -->
+                <div class="label-art" style="background-image: url('@ImageUrl');"></div>
+                
+                <!-- Game Title -->
+                <div class="label-title">
+                    @Title
+                </div>
+                
+                <!-- Fake "Seal of Quality" -->
+                <div class="label-seal">
+                    <img src="/images/GetteGarageLogo_favicon.png" alt="Seal" class="seal-img" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <!-- Shadow cast on the shelf -->
+    <div class="shelf-shadow"></div>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "UNKNOWN";
+    [Parameter] public string Version { get; set; } = "v1.0";
+    [Parameter] public string ImageUrl { get; set; } = "";
+    [Parameter] public string PlayLink { get; set; } = "#";
+    
+    // Allows us to have grey, gold, or red cartridges
+    [Parameter] public string PlasticColorClass { get; set; } = "plastic-grey";
+
+    private async Task PlayHover()
+    {
+        try { await JS.InvokeVoidAsync("playSound", "hover.mp3"); } catch {}
+    }
+
+    private async Task InsertCartridge()
+    {
+        // Play a heavy 'clunk' sound for inserting the game
+        try { await JS.InvokeVoidAsync("playSound", "click.mp3"); } catch {}
+        
+        // Wait just a split second so the CSS 'push down' animation finishes before navigating
+        await Task.Delay(150); 
+        Nav.NavigateTo(PlayLink);
+    }
+}
+
+<style>
+    .cartridge-wrapper {
+        position: relative;
+        width: 300px;
+        height: 320px;
+        perspective: 800px;
+        margin-top: 40px; /* Room to lift up */
+    }
+
+    /* THE PLASTIC SHELL */
+    .cartridge-shell {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 10px 10px 0 0;
+        border: 2px solid #111;
+        border-bottom: none;
+        cursor: pointer;
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 2;
+        /* Default inner shadow to make it look 3D */
+        box-shadow: inset -5px 0 15px rgba(0,0,0,0.5), inset 5px 0 10px rgba(255,255,255,0.1);
+    }
+
+    /* Color Variations */
+    .plastic-grey { background-color: #555; }
+    .plastic-gold { background-color: #d4af37; } /* For special editions */
+    .plastic-red  { background-color: #cf4024; }
+
+    /* The Hover Effect (Pulling it off the shelf) */
+    .cartridge-shell:hover {
+        transform: translateY(-30px);
+    }
+
+    /* The Click Effect (Jamming it into the console) */
+    .cartridge-shell:active {
+        transform: translateY(10px);
+        transition: transform 0.05s;
+    }
+
+    /* GRIP RIDGES */
+    .cartridge-ridges {
+        width: 60%;
+        height: 20px;
+        margin: 15px auto;
+        /* Creates the 3 horizontal lines */
+        background: repeating-linear-gradient(
+            to bottom,
+            rgba(0,0,0,0.3),
+            rgba(0,0,0,0.3) 2px,
+            transparent 2px,
+            transparent 6px
+        );
+    }
+
+    /* LABEL INDENT (The sunken plastic area) */
+    .cartridge-indent {
+        width: 85%;
+        height: 70%;
+        margin: 0 auto;
+        background: rgba(0,0,0,0.2);
+        border-radius: 5px;
+        box-shadow: inset 0 3px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.2);
+        padding: 4px;
+    }
+
+    /* THE STICKER */
+    .cartridge-label {
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        border-radius: 2px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .label-header {
+        background: #111;
+        color: #f6a91f;
+        padding: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #f6a91f;
+    }
+
+    .label-art {
+        width: 100%;
+        flex-grow: 1;
+        background-size: cover;
+        background-position: center;
+        border-bottom: 2px solid #222;
+    }
+
+    .label-title {
+        background: #222;
+        color: #fff;
+        text-align: center;
+        padding: 10px 5px;
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: bold;
+        font-size: 1.1rem;
+        line-height: 1.1;
+        text-transform: uppercase;
+    }
+
+    .label-seal {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        width: 32px; /* Slightly larger to fit the image */
+        height: 32px;
+        
+        /* The metallic border effect */
+        background: radial-gradient(circle, #ffd700 0%, #b8860b 100%);
+        border-radius: 50%;
+        padding: 2px; /* Creates the border thickness */
+        
+        /* The dotted edge like a real sticker */
+        border: 1px dotted #fff;
+        
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        /* Subtle drop shadow against the label */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    /* The Image inside the ring */
+    .seal-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Ensures the image fills the circle */
+        border-radius: 50%; /* Crops the square image into a circle */
+        
+        /* Optional: Gives the image a slight sepia/gold tint to match the seal */
+        filter: sepia(0.5) contrast(1.2); 
+    }
+
+    /* THE SHELF SHADOW */
+    .shelf-shadow {
+        position: absolute;
+        bottom: -5px;
+        left: 5%;
+        width: 90%;
+        height: 10px;
+        background: rgba(0,0,0,0.8);
+        filter: blur(5px);
+        z-index: 1;
+        transition: all 0.2s;
+    }
+    .cartridge-shell:hover ~ .shelf-shadow {
+        width: 80%;
+        left: 10%;
+        filter: blur(10px);
+        opacity: 0.5;
+    }
+</style>

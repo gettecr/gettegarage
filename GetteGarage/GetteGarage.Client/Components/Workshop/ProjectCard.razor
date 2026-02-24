@@ -1,0 +1,25 @@
+<MudPaper Class="pa-4 project-card" Style="border: 1px solid #333; background: #0a0a1f;">
+    <MudText Typo="Typo.h6" Color="Color.Primary">@Title</MudText>
+    <MudChip T="string" Color="Color.Secondary" Size="Size.Small" Class="my-2">@Role</MudChip>
+    <MudText Typo="Typo.body2" Class="mb-3">@Desc</MudText>
+    <MudText Typo="Typo.caption" Color="Color.Tertiary">Tech: @Tech</MudText>
+    
+    @if(!string.IsNullOrEmpty(Link))
+    {
+        <div class="mt-4">
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="@Link">Launch</MudButton>
+        </div>
+    }
+</MudPaper>
+
+<style>
+    .project-card:hover { border-color: #00f0ff; box-shadow: 0 0 15px rgba(0, 240, 255, 0.2); }
+</style>
+
+@code {
+    [Parameter] public string Title { get; set; }
+    [Parameter] public string Role { get; set; }
+    [Parameter] public string Tech { get; set; }
+    [Parameter] public string Desc { get; set; }
+    [Parameter] public string Link { get; set; }
+}

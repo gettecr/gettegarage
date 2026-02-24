@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link rel="stylesheet" href="app.css" />
+    <link rel="stylesheet" href="GetteGarage.styles.css" />
+    <link rel="icon" type="image/png" href="images/GetteGarageLogo_favicon.png" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+    <HeadOutlet />
+</head>
+
+<body>
+    <Routes />
+
+    <div id="crt-layer"></div>
+    <script src="_framework/blazor.web.js"></script>
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+
+    <script>
+        // Listen for keys
+        window.registerGlobalKeyHandler = (dotNetHelper) => {
+            window.addEventListener('keydown', (e) => {
+                dotNetHelper.invokeMethodAsync('HandleKeyPress', e.key);
+            });
+        };
+
+
+        window.applyCrtFromStorage = () => {
+            const isCrt = localStorage.getItem('crt') === 'true';
+            // CHANGE: Target the layer, not the body
+            const layer = document.getElementById('crt-layer');
+            
+            if (isCrt) {
+                layer.classList.add('active');
+            } else {
+                layer.classList.remove('active');
+            }
+        };
+
+        window.toggleCrtMode = () => {
+            const layer = document.getElementById('crt-layer');
+            
+            if (layer.classList.contains('active')) {
+                // TURNING OFF
+                localStorage.setItem('crt', 'false');
+                
+                layer.classList.remove('active');
+                layer.classList.add('turn-off'); // Play exit animation
+                
+                setTimeout(() => {
+                    layer.classList.remove('turn-off');
+                }, 550);
+            } else {
+                // TURNING ON
+                localStorage.setItem('crt', 'true');
+                layer.classList.add('active');
+            }
+        };
+
+        window.applyCrtFromStorage();
+
+        if (typeof Blazor !== 'undefined') {
+            Blazor.addEventListener('enhancedload', () => {
+                window.applyCrtFromStorage();
+            });
+        }
+    </script>
+
+</body>
+
+</html>
+

@@ -1,0 +1,70 @@
+﻿@inherits LayoutComponentBase
+@using MudBlazor
+
+<MudThemeProvider Theme="GameTheme" IsDarkMode="true" />
+
+<!-- Required Providers for MudBlazor features -->
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
+
+<MudLayout>
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    // 1. Initialize the theme using a helper method to keep code clean
+    private MudTheme GameTheme = CreateGameTheme();
+
+    private static MudTheme CreateGameTheme()
+    {
+        var theme = new MudTheme();
+
+        theme.PaletteDark = new PaletteDark()
+        {
+            Primary = "#f6a91f",      // Retro Orange
+            Secondary = "#cf4024",    // Burnt Red/Orange
+            Success = "#f6a91f",      // Match Primary for consistency
+            Background = "#121324",    
+            Surface = "#2d2e45",      // Lighter Slate
+            AppbarBackground = "#000000",
+            TextPrimary = "#e0e0e0",
+            Tertiary = "#2ecc71",
+            
+            // Make the drawer/menus match the surface
+            DrawerBackground = "#2d2e45", 
+            ActionDefault = "#f6a91f"
+        };
+
+        
+        var hudFont = new[] { "Rajdhani", "sans-serif" };
+        var pixelFont = new[] { "Press Start 2P", "cursive" };
+
+        theme.Typography.Default.FontFamily = hudFont;
+        
+        theme.Typography.H1.FontFamily = pixelFont;
+        theme.Typography.H1.LineHeight = "1.5";
+
+        theme.Typography.H2.FontFamily = pixelFont;
+        theme.Typography.H2.LineHeight = "1.5";
+
+        theme.Typography.H3.FontFamily = pixelFont;
+        theme.Typography.H3.LineHeight = "1.5";
+
+        theme.Typography.H4.FontFamily = pixelFont;
+        theme.Typography.H4.LineHeight = "1.5";
+
+        theme.Typography.H5.FontFamily = pixelFont;
+        theme.Typography.H5.LineHeight = "1.5";
+
+        theme.Typography.H6.FontFamily = pixelFont;
+        theme.Typography.H6.LineHeight = "1.5";
+
+        theme.Typography.Button.FontFamily = pixelFont;
+        theme.Typography.Button.FontSize = ".7rem";
+
+        return theme;
+    }
+}

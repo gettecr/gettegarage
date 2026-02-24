@@ -1,0 +1,51 @@
+@using MudBlazor
+
+<MudDialog Class="blueprint-scanner">
+    <DialogContent>
+        <!-- The Grid Overlay -->
+        <div class="blueprint-grid"></div>
+        
+        <!-- The Image -->
+        <div class="d-flex justify-center" style="position: relative; z-index: 2;">
+            <MudImage Src="@Item.Url" ObjectFit="ObjectFit.Contain" 
+                      Style="max-height: 70vh; max-width: 100%; border: 1px solid #f6a91f;" 
+                      Class="blueprint-img"/>
+        </div>
+
+        <!-- Meta Data Panel -->
+        <div class="mt-4 pa-3" style="border-top: 2px dashed #cf4024; font-family: 'Rajdhani'; color: #f6a91f;">
+            <MudText Typo="Typo.subtitle1">/// NAME: @Item.Title.ToUpper()</MudText>
+            <MudText Typo="Typo.caption" Style="color: #e0e0e0;">@Item.Description</MudText>
+        </div>
+    </DialogContent>
+    
+    <DialogActions>
+        <MudButton OnClick="Close" Variant="Variant.Text" Color="Color.Error">CLOSE</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<style>
+    .blueprint-scanner {
+        background-color: #0d0e1b !important;
+        border: 2px solid #f6a91f !important;
+        color: #f6a91f !important;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .blueprint-grid {
+        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        background-image: 
+            linear-gradient(rgba(246, 169, 31, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(246, 169, 31, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+        z-index: 1;
+        pointer-events: none;
+    }
+</style>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    [Parameter] public ArtPortfolio.ArtItem Item { get; set; }
+    void Close() => MudDialog.Close(DialogResult.Ok(true));
+}

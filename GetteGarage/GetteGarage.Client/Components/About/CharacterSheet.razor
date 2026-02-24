@@ -1,0 +1,293 @@
+@using MudBlazor
+@using GetteGarage.Client.Components.Shared
+@rendermode InteractiveWebAssembly
+@inject IDialogService DialogService
+
+<MudGrid Class="character-sheet-container">
+    
+    <!-- LEFT COLUMN: Avatar & Stats -->
+    <MudItem xs="12" md="4" Class="d-flex flex-column align-center">
+        
+        <!-- Player Avatar -->
+        <div class="avatar-frame mb-4">
+            <MudImage Src="images/avatar_placeholder.png" Class="pixel-avatar" Alt="Player Avatar" />
+        </div>
+
+        <MudText Typo="Typo.h5" Color="Color.Primary" Style="font-family: 'Press Start 2P'">DR. GETTE</MudText>
+        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-4">TECHNICAL LEAD & GAME DEV</MudText>
+
+        <div class="d-flex gap-2 mb-4">
+        <MudButton Variant="Variant.Filled" 
+                   Color="Color.Info" 
+                   StartIcon="@Icons.Material.Filled.WifiTethering"
+                   OnClick="OpenContact" 
+                   FullWidth="false" 
+                   Class="mt-4 pulse-button" 
+                   Style="font-family: 'Press Start 2P'; font-size: 0.6rem; border: 2px solid  rgba(50,153,255,1);">
+            CONTACT ME!
+        </MudButton>
+        </div>
+
+        <!-- Skill Tree (Moved to Left Column to save space) -->
+        <MudText Typo="Typo.h6" Color="Color.Secondary" Class="mt-6 mb-3" Style="font-family: 'Press Start 2P'; font-size: 0.8rem;">
+        COMPETENCIES
+        </MudText>
+        
+        <div class="d-flex flex-wrap gap-3" style="width: 100%;">
+            @foreach (var skill in Skills)
+            {
+                <div class="tech-cartridge">
+                    <!-- Color Bar -->
+                    <div class="cartridge-bar" style="background-color: @GetColorHex(skill.Color)"></div>
+                    
+                    <!-- Content -->
+                    <div class="cartridge-content">
+                        <div class="d-flex justify-space-between align-center">
+                            <MudIcon Icon="@skill.Icon" Size="Size.Small" Style="@($"color:{GetColorHex(skill.Color)}")" />
+                            <span class="tech-version">@skill.Version</span>
+                        </div>
+                        <MudText Typo="Typo.body2" Class="mt-1" Style="font-family: 'Rajdhani'; font-weight: bold;">
+                            @skill.Name
+                        </MudText>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </MudItem>
+
+    <!-- RIGHT COLUMN: Quests & Lore -->
+    <MudItem xs="12" md="8">
+        
+        <!-- Biography Terminal -->
+        <MudPaper Class="pa-6 mb-6 crt-screen" Style="background: #050510; border: 1px solid #f6a91f;">
+            <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-2">BIO</MudText>
+            <MudText Typo="Typo.body1" Style="font-family: 'Rajdhani'; line-height: 1.6;">
+                Physics PhD turned Data Scientist and Indie Dev.
+                <br/><br/>
+                Currently modernizing government HR systems with AI-powered software while building indie games in Godot on the weekends.
+            </MudText>
+        </MudPaper>
+
+        <!-- Quest Log (Experience) -->
+        <MudText Typo="Typo.h6" Color="Color.Secondary" Class="mb-3" Style="font-family: 'Press Start 2P'">EXPERIENCE</MudText>
+        
+        <MudTimeline TimelinePosition="TimelinePosition.Start">
+            
+            <!-- Current Job -->
+            <MudTimelineItem Color="Color.Success" Size="Size.Small">
+                <ItemOpposite>
+                    <MudText Typo="Typo.caption" Color="Color.Success">CURRENT</MudText>
+                </ItemOpposite>
+                <ItemContent>
+                    <MudText Typo="Typo.subtitle1" Color="Color.Primary" Style="font-weight:bold;">Tech Lead: AI & Software</MudText>
+                    <MudText Typo="Typo.caption">OPM (HRS)</MudText>
+                    <MudText Typo="Typo.body2" Class="mt-2 text-dim">
+                        • Leading cloud modernization (Azure, Databricks).<br/>
+                        • Establishing foundational Data Science capabilities.<br/>
+                        • Architecting AI-powered HR solutions.
+                    </MudText>
+                </ItemContent>
+            </MudTimelineItem>
+
+            <!-- Previous Job -->
+            <MudTimelineItem Color="Color.Secondary" Size="Size.Small">
+                <ItemOpposite>
+                    <MudText Typo="Typo.caption">COMPLETED</MudText>
+                </ItemOpposite>
+                <ItemContent>
+                    <MudText Typo="Typo.subtitle1" Color="Color.Primary" Style="font-weight:bold;">Lead Data Scientist</MudText>
+                    <MudText Typo="Typo.caption">Edison Software</MudText>
+                    <MudText Typo="Typo.body2" Class="mt-2 text-dim">
+                        • Built NLP classifiers and Image Matching systems.<br/>
+                        • AWS, Python, PySpark, SQL.<br/>
+                        • Quarterly KPI predictions.
+                    </MudText>
+                </ItemContent>
+            </MudTimelineItem>
+            
+             <!-- Indie Dev -->
+            <MudTimelineItem Color="Color.Info" Size="Size.Small">
+                <ItemOpposite>
+                    <MudText Typo="Typo.caption">SIDE QUEST</MudText>
+                </ItemOpposite>
+                <ItemContent>
+                    <MudText Typo="Typo.subtitle1" Color="Color.Primary" Style="font-weight:bold;">Solo Game Developer</MudText>
+                    <MudText Typo="Typo.caption">Itch.io</MudText>
+                    <MudText Typo="Typo.body2" Class="mt-2 text-dim">
+                        • Developing 2D games with Godot & C#.<br/>
+                        • Published multiple titles independently.
+                    </MudText>
+                </ItemContent>
+            </MudTimelineItem>
+
+        </MudTimeline>
+
+        <!-- Education -->
+        <MudText Typo="Typo.h6" Color="Color.Secondary" Class="mt-6 mb-3" Style="font-family: 'Press Start 2P'">EDUCATION</MudText>
+        <MudGrid>
+            <MudItem xs="12" sm="6">
+                <MudCard Class="pa-3" Style="background: rgba(255,255,255,0.05); border-left: 3px solid #f6a91f;">
+                    <div class="d-flex align-center mb-2">
+                        <MudIcon Icon="@Icons.Material.Filled.School" Color="Color.Primary" Class="mr-2"/>
+                        <MudText Typo="Typo.subtitle2">PhD Physics</MudText>
+                    </div>
+                    <MudText Typo="Typo.caption">
+                        Research on cognitive theories of learning and intuition in physics.
+                    </MudText>
+                </MudCard>
+            </MudItem>
+             <MudItem xs="12" sm="6">
+                <MudCard Class="pa-3" Style="background: rgba(255,255,255,0.05); border-left: 3px solid #cf4024;">
+                    <div class="d-flex align-center mb-2">
+                        <MudIcon Icon="@Icons.Material.Filled.AutoAwesome" Color="Color.Secondary" Class="mr-2"/>
+                        <MudText Typo="Typo.subtitle2">MS Astrophysics</MudText>
+                    </div>
+                    <MudText Typo="Typo.caption">
+                        Spectral data analysis of 100 ATLASGAL sources in star-forming regions.
+                    </MudText>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+
+        <!-- Inventory (Tools) -->
+        <MudText Typo="Typo.h6" Color="Color.Secondary" Class="mt-8 mb-3" Style="font-family: 'Press Start 2P'">TOOLBELT</MudText>
+        <div class="d-flex gap-4 flex-wrap">
+            <InventorySlot Icon="@Icons.Custom.Brands.MicrosoftAzure" Name="Azure" />
+            <InventorySlot Icon="@Icons.Material.Filled.DataObject" Name="AWS" />
+            <InventorySlot Icon="@Icons.Material.Filled.Code" Name="Code" />
+            <InventorySlot Icon="@Icons.Custom.Brands.Linux" Name="Linux" />
+            <InventorySlot Icon="@Icons.Custom.Brands.GitHub" Name="GitHub" />
+            <InventorySlot Icon="@Icons.Material.Filled.Gamepad" Name="Godot" />
+            <InventorySlot Icon="@Icons.Material.Filled.Storage" Name="Databricks" />
+            <InventorySlot Icon="@Icons.Material.Filled.Coffee" Name="Coffee" />
+        </div>
+
+    </MudItem>
+</MudGrid>
+
+<style>
+    .avatar-frame {
+        width: 150px; height: 150px;
+        border: 4px solid #f6a91f;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #000;
+        box-shadow: 0 0 15px rgba(246, 169, 31, 0.3);
+    }
+    
+    .stat-row { display: flex; align-items: center; font-family: 'Press Start 2P'; font-size: 0.7rem; }
+    
+    .skill-bar .mud-progress-linear-bar {
+        transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .crt-screen { box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+    .text-dim { opacity: 0.8; font-family: 'Rajdhani'; font-size: 0.95rem; }
+
+    .pulse-button {
+        animation: btn-pulse 2s infinite;
+    }
+    
+        @@keyframes btn-pulse {
+            0% { box-shadow: 0 0 0 0  rgba(50,153,255,.9); }
+            70% { box-shadow: 0 0 0 10px  rgba(50,153,255,0); }
+            100% { box-shadow: 0 0 0 0  rgba(50,153,255,0); }
+        }
+
+    .tech-cartridge {
+        flex: 1 1 45%; /* 2 items per row */
+        min-width: 140px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid #333;
+        border-radius: 4px;
+        display: flex;
+        overflow: hidden;
+        transition: all 0.2s ease;
+        cursor: default;
+    }
+
+    .tech-cartridge:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: #f6a91f;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    .cartridge-bar {
+        width: 6px;
+        height: 100%;
+        /* The color is set inline based on the skill */
+    }
+
+    .cartridge-content {
+        padding: 8px 12px;
+        width: 100%;
+    }
+
+    .tech-version {
+        font-family: monospace;
+        font-size: 0.6rem;
+        opacity: 0.5;
+        letter-spacing: 1px;
+    }
+</style>
+
+@code {
+    private bool _loaded = false;
+    private int YearsExperience => DateTime.Now.Year - 2012;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Task.Delay(200); 
+            _loaded = true;
+            StateHasChanged();
+        }
+    }
+
+    class Skill 
+{ 
+    public string Name { get; set; } 
+    public string Version { get; set; } // Replaces "Value"
+    public string Icon { get; set; }    // Visual flair
+    public Color Color { get; set; } 
+}
+
+    private List<Skill> Skills = new()
+{
+    new Skill { Name = "C# / .NET", Version = "WEB DEV", Icon = Icons.Material.Filled.Terminal, Color = Color.Primary },
+    new Skill { Name = "Python", Version = "ML/AI DATA SCIENCE", Icon = Icons.Custom.Brands.Calculator, Color = Color.Primary },
+    new Skill { Name = "Azure", Version = "CLOUD", Icon = Icons.Custom.Brands.MicrosoftAzure, Color = Color.Info },
+    new Skill { Name = "Godot", Version = "GAME ENGINE", Icon = Icons.Material.Filled.Gamepad, Color = Color.Secondary },
+    new Skill { Name = "Physics", Version = "MAX EDUCATION", Icon = Icons.Material.Filled.Science, Color = Color.Warning },
+    new Skill { Name = "SQL", Version = "MORE DATA", Icon = Icons.Material.Filled.Storage, Color = Color.Success }
+};
+
+    private void OpenContact() {
+
+        var options = new DialogOptions 
+        { 
+            CloseButton = false, 
+            MaxWidth = MaxWidth.Small, 
+            FullWidth = true,
+            BackdropClick = true
+        };
+        
+        DialogService.ShowAsync<ContactDialog>("", options);
+    }
+
+    private string GetColorHex(Color color)
+    {
+        return color switch
+        {
+            Color.Primary => "#f6a91f", // Orange
+            Color.Secondary => "#cf4024", // Red
+            Color.Info => "#29b6f6", // Blue
+            Color.Success => "#00c853", // Green
+            Color.Warning => "#ff9800", // Yellow/Gold
+            _ => "#e0e0e0"
+        };
+    }
+}

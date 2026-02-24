@@ -1,0 +1,49 @@
+﻿@page "/"
+
+<div class="title-screen-container">
+    
+    <GetteGarage.Client.Components.Home.TitleLogo 
+        @rendermode="@(new InteractiveWebAssemblyRenderMode(prerender: false))" />
+
+    <!-- 2. The Menu (Game Select Style) -->
+    <GetteGarage.Client.Components.Home.HomeMenu 
+        @rendermode="@(new InteractiveWebAssemblyRenderMode(prerender: false))" />
+    
+
+
+</div>
+
+<style>
+    .title-screen-container {
+        /* FIX: Use fixed positioning to cover the whole screen */
+        position: fixed; 
+        top: 0; 
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        
+        /* Ensure it sits above the MudLayout background but below your Global Buttons */
+        z-index: 10; 
+        
+        /* Flexbox centering */
+        display: flex;
+        flex-direction: column; 
+        align-items: center;
+        justify-content: center;
+        
+        /* Your Gradient */
+        @* background: radial-gradient(circle at center, #1a1a3a 0%, #000 100%); *@
+        overflow: hidden;
+    }
+
+    .menu-row {
+        display: flex;
+        flex-direction: row;
+        gap: 2rem;
+        flex-wrap: wrap; /* Wrap on small screens */
+        justify-content: center;
+        width: 100%;
+        max-width: 1200px;
+    }
+
+</style>

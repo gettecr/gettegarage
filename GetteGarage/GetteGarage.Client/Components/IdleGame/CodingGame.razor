@@ -1,0 +1,271 @@
+@inject CodeGameEngine Engine
+@implements IDisposable
+
+<div class="d-flex flex-column pa-4" style="height: 100%; box-sizing: border-box; color: #c9d1d9; overflow: hidden;">
+
+    <!-- TOP: Stats & Controls -->
+    <div class="mb-4" style="flex-shrink: 0;">
+        <div class="d-flex justify-space-between align-center mb-2">
+            <div>
+                <MudText Typo="Typo.h5" Style="font-family: monospace; color: #58a6ff;">PROJECT_OMEGA</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Surface">
+                    Active Modules: @Engine.State.Modules.Count | Stability: @(Engine.State.Modules.Any() ? (int)Engine.State.Modules.Average(m => m.Health) : 100)%
+                </MudText>
+            </div>
+            <div class="text-right">
+                <MudText Typo="Typo.h4" Color="Color.Success">@Engine.State.LinesOfCode.ToString("N0") LOC</MudText>
+                <MudText Typo="Typo.body2" Style="@($"color:{GetDebtColorHex()};")">
+                    Tech Debt: @Engine.State.TechnicalDebt.ToString("F1")%
+                </MudText>
+            </div>
+        </div>
+
+        <div class="d-flex gap-4">
+            <MudButton Variant="Variant.Outlined" Color="Color.Success" Class="py-2 flex-grow-1" OnClick="() => Engine.WriteCode()">
+                WRITE CODE
+            </MudButton>
+            @if (Engine.State.ActiveBugs > 0)
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Error" Class="py-2 flex-grow-1" OnClick="() => Engine.DebugCode()">
+                    GLOBAL DEBUG (@Engine.State.ActiveBugs)
+                </MudButton>
+            }
+        </div>
+    </div>
+
+    <!-- MIDDLE: Split View -->
+    <div class="d-flex gap-4 flex-grow-1" style="min-height: 0; margin-bottom: 16px;">
+
+        <!-- LEFT: Upgrades & System Options -->
+        <MudPaper Class="pa-2 d-flex flex-column"
+                  Style="width: 280px; background: #161b22; border: 1px solid #30363d; flex-shrink: 0;">
+            
+            <MudText Typo="Typo.subtitle2" Class="mb-2 pa-1" Align="Align.Center" Style="color: #8b949e;">RESOURCES</MudText>
+            
+            <!-- Upgrades List (Scrolls) -->
+            <div class="custom-scroll flex-grow-1" style="overflow-y: auto;">
+                @foreach (var upgrade in Engine.Upgrades)
+                {
+                    <div class="pa-2 mb-2 rounded" style="background: #0d1117; border: 1px solid #30363d;">
+                        <div class="d-flex justify-space-between align-center">
+                            <MudText Typo="Typo.body2" Style="color: #c9d1d9;">@upgrade.Name</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Success">Lvl @upgrade.Level</MudText>
+                        </div>
+                        <MudText Typo="Typo.caption" Style="color: #8b949e; display:block; margin-bottom: 4px;">@upgrade.Description</MudText>
+                        <MudButton Variant="Variant.Text" Size="Size.Small" FullWidth="true" Color="Color.Success"
+                                   Disabled="@(Engine.State.LinesOfCode < upgrade.CurrentCost)"
+                                   OnClick="() => Engine.BuyUpgrade(upgrade.Id)">
+                            Buy @upgrade.CurrentCost.ToString("N0")
+                        </MudButton>
+                    </div>
+                }
+            </div>
+
+            <!-- SYSTEM FOOTER (Reset/Save) -->
+            <div class="mt-2 pt-2" style="border-top: 1px solid #30363d;">
+                <MudButton Variant="Variant.Outlined" Color="Color.Info" Size="Size.Small" FullWidth="true" Class="mb-2" OnClick="SaveGame">
+                    FORCE SAVE
+                </MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small" FullWidth="true" OnClick="HardReset">
+                    HARD RESET
+                </MudButton>
+            </div>
+        </MudPaper>
+
+        <!-- RIGHT: Rack -->
+        <MudPaper Class="pa-0 d-flex flex-column flex-grow-1"
+                  Style="background: #090c10; border: 1px solid #30363d; min-width: 0;">
+
+            <!-- Header -->
+            <div class="d-flex justify-space-between align-center pa-2" style="background: #161b22; border-bottom: 1px solid #30363d; flex-shrink: 0;">
+                <MudText Typo="Typo.subtitle2" Style="color: #8b949e;">SERVER RACK</MudText>
+                
+                <!-- RESTORED: Price Calculation and Disabled State -->
+                <MudButton Variant="Variant.Filled" Size="Size.Small" Color="Color.Primary"
+                           Disabled="@(Engine.State.LinesOfCode < GetNextModuleCost())"
+                           OnClick="@(() => Engine.AddModule("Service"))">
+                    + Deploy Service (@GetNextModuleCost().ToString("N0"))
+                </MudButton>
+            </div>
+
+            <!-- Grid -->
+            <div class="d-flex flex-wrap gap-2 content-start custom-scroll pa-2"
+                 style="overflow-y: auto; flex-grow: 1;">
+                @foreach (var mod in Engine.State.Modules)
+                {
+                    <div class="@GetModuleCssClass(mod)" @onclick="() => SelectModule(mod)">
+                        <div class="d-flex justify-space-between align-center mb-1" style="width: 100%;">
+                            <span class="mod-name" title="@mod.Name">@mod.Name</span>
+                            @if (mod.BugCount > 0) { <span class="bug-badge">@mod.BugCount</span> }
+                        </div>
+                        <div class="mod-status">@GetStatusText(mod)</div>
+                        <div class="health-track">
+                            <div class="health-fill" style="width: @(mod.Health)%; background: @GetHealthColor(mod.Health);"></div>
+                        </div>
+                        @if (mod.BugCount > 0) {
+                            <div class="bug-overlay" @onclick:stopPropagation @onclick="() => Engine.FixModule(mod.Id)">FIX</div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Inspector -->
+            @if (_selectedModule != null)
+            {
+                <div class="pa-3" style="background: #161b22; border-top: 1px solid #58a6ff; height: 140px; flex-shrink: 0;">
+                     <div class="d-flex gap-4" style="height: 100%;">
+                        <!-- Left: Info & Delete -->
+                        <div style="width: 50%; display: flex; flex-direction: column;">
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Color="Color.Info" Class="mb-1">SELECTED: @_selectedModule.Name</MudText>
+                                <MudText Typo="Typo.caption" Class="d-block" Style="color: #c9d1d9;">
+                                    Output: <b>@_selectedModule.EffectiveProduction.ToString("F1")</b> / @_selectedModule.BaseProduction
+                                </MudText>
+                                 <MudText Typo="Typo.caption" Style="@(_selectedModule.Health < 100 ? "color:#d73a49;" : "color:#2ea043;")">
+                                    Status: @(_selectedModule.Health <= 0 ? "REBOOTING..." : $"{_selectedModule.Health:F0}%")
+                                </MudText>
+                            </div>
+                            
+                            <!-- DELETE BUTTON -->
+                            <div class="mt-auto">
+                                <MudButton Variant="Variant.Outlined" Color="Color.Error" Size="Size.Small" 
+                                           StartIcon="@Icons.Material.Filled.Delete"
+                                           OnClick="DeleteSelectedModule">
+                                    TERMINATE MODULE
+                                </MudButton>
+                            </div>
+                        </div>
+
+                        <!-- Right: Dependencies -->
+                        <div style="width: 50%; border-left: 1px solid #30363d; padding-left: 10px; overflow-y: auto;" class="custom-scroll">
+                            <MudText Typo="Typo.subtitle2" Style="color: #a371f7;">DEPENDENCIES</MudText>
+                            @if (_selectedModule.Dependencies.Any()) {
+                                @foreach (var depId in _selectedModule.Dependencies) {
+                                    var parent = Engine.State.Modules.FirstOrDefault(m => m.Id == depId);
+                                    if (parent != null) {
+                                        <div class="d-flex align-center gap-2 mt-1 cursor-pointer parent-link" @onclick="() => SelectModule(parent)">
+                                            <MudIcon Icon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" Style="font-size: 1rem; color: #a371f7;" />
+                                            <MudText Typo="Typo.caption" Style="color: #c9d1d9;">@parent.Name</MudText>
+                                        </div>
+                                    }
+                                }
+                            } else {
+                                <MudText Typo="Typo.caption" Style="color: #666;">No dependencies.</MudText>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </MudPaper>
+    </div>
+
+    <!-- BOTTOM: Log -->
+    <div class="pa-2 rounded" style="background: #000; height: 80px; flex-shrink: 0; overflow: hidden; font-family: 'Courier New'; font-size: 0.75rem; border: 1px solid #333;">
+        @foreach (var log in Engine.State.Logs)
+        {
+            <div style="color: #00ff00;">> @log</div>
+        }
+    </div>
+</div>
+
+@code {
+    private CodeGameCodeModule? _selectedModule;
+
+    protected override void OnInitialized()
+    {
+        Engine.OnStateChanged += HandleStateChange;
+    }
+
+    private void HandleStateChange()
+    {
+        // Re-check selection: if the selected module was deleted, deselect it
+        if (_selectedModule != null && !Engine.State.Modules.Any(m => m.Id == _selectedModule.Id))
+        {
+            _selectedModule = null;
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Engine.OnStateChanged -= HandleStateChange;
+    }
+
+    private void SelectModule(CodeGameCodeModule mod)
+    {
+        _selectedModule = mod;
+        StateHasChanged();
+    }
+
+    private void DeleteSelectedModule()
+    {
+        if (_selectedModule != null)
+        {
+            Engine.DeleteModule(_selectedModule.Id);
+            _selectedModule = null;
+        }
+    }
+
+    private async Task SaveGame() => await Engine.SaveGameAsync();
+    private async Task HardReset() => await Engine.HardResetAsync();
+
+    // ... (Keep existing GetModuleCssClass, GetStatusText, GetHealthColor, GetDebtColorHex) ...
+    private string GetModuleCssClass(CodeGameCodeModule mod)
+    {
+        var css = "module-card";
+        if (_selectedModule != null)
+        {
+            if (_selectedModule.Id == mod.Id) css += " selected";
+            else if (_selectedModule.Dependencies.Contains(mod.Id)) css += " is-parent";
+        }
+        if (mod.Health <= 0) css += " crashed";
+        return css;
+    }
+
+    private string GetStatusText(CodeGameCodeModule mod)
+    {
+        if (mod.BugCount > 0) return "BUG DETECTED";
+        if (mod.Health <= 0) return "REBOOTING..."; // Changed text here
+        if (mod.EffectiveProduction < (mod.BaseProduction * 0.5) && mod.BaseProduction > 0) return "BLOCKED BY DEP";
+        return $"{mod.EffectiveProduction:F1}/s";
+    }
+
+    private string GetHealthColor(double health)
+    {
+        if (health <= 0) return "#d73a49"; 
+        if (health < 50) return "#d29922"; 
+        return "#2ea043"; 
+    }
+
+    private string GetDebtColorHex()
+    {
+        if (Engine.State.TechnicalDebt < 20) return "#2ea043"; 
+        if (Engine.State.TechnicalDebt < 50) return "#d29922"; 
+        return "#d73a49"; 
+    }
+    private double GetNextModuleCost()
+    {
+        return 100 * Math.Pow(1.5, Engine.State.Modules.Count);
+    }
+}
+<!-- Keep CSS Styles the same -->
+<style>
+    /* ... same styles as before ... */
+    .module-card { width: 110px; height: 90px; background: #161b22; border: 1px solid #30363d; border-radius: 4px; padding: 6px; position: relative; cursor: pointer; transition: all 0.1s; display: flex; flex-direction: column; }
+    .module-card:hover { border-color: #58a6ff; }
+    .module-card.selected { border: 2px solid #58a6ff; background: #1c2128; box-shadow: 0 0 10px rgba(88, 166, 255, 0.2); }
+    .module-card.is-parent { border: 2px solid #a371f7; box-shadow: 0 0 10px rgba(163, 113, 247, 0.2); }
+    .module-card.crashed { border: 1px solid #d73a49; background: #3e0b0b; }
+    .mod-name { font-size: 0.7rem; font-weight: bold; color: #c9d1d9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; max-width: 80px; }
+    .mod-status { font-size: 0.65rem; color: #8b949e; margin-top: auto; margin-bottom: 4px; white-space: nowrap; }
+    .bug-badge { background: #d73a49; color: white; font-size: 0.6rem; font-weight: bold; padding: 0px 4px; border-radius: 4px; margin-left: auto; }
+    .health-track { height: 4px; background: #30363d; width: 100%; border-radius: 2px; overflow: hidden; }
+    .health-fill { height: 100%; transition: width 0.3s; }
+    .bug-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: rgba(215, 58, 73, 0.9); color: white; font-weight: bold; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; }
+    .bug-overlay:hover { background: #d73a49; }
+    .parent-link:hover { opacity: 0.8; }
+    .custom-scroll::-webkit-scrollbar { width: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #0d1117; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #58a6ff; }
+</style>

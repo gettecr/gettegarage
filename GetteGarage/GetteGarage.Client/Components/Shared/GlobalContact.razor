@@ -1,0 +1,29 @@
+@using MudBlazor
+@inject IDialogService DialogService
+@rendermode InteractiveWebAssembly
+
+<!-- 
+    Position: right: 160px 
+    (Terminal is 20px, Game is 90px, so we add another 70px gap)
+-->
+<MudTooltip Text="Open Comms">
+    <MudFab Color="Color.Info" 
+            StartIcon="@Icons.Material.Filled.WifiTethering" 
+            OnClick="OpenContact" 
+            Style="position: fixed; bottom: 40px; right: 160px; z-index: 2001;" />
+</MudTooltip>
+
+@code {
+    private void OpenContact()
+    {
+        var options = new DialogOptions 
+        { 
+            CloseButton = false, 
+            MaxWidth = MaxWidth.Small, 
+            FullWidth = true,
+            BackdropClick = true
+        };
+        
+        DialogService.ShowAsync<ContactDialog>("", options);
+    }
+}

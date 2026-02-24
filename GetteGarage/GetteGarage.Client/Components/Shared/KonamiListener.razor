@@ -1,0 +1,54 @@
+@inject IJSRuntime JS
+@rendermode InteractiveWebAssembly
+@inject AchievementService Achievements
+
+@code {
+    private List<string> _sequence = new();
+    private readonly List<string> _konami = new() 
+    { 
+        "ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", 
+        "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", 
+        "b", "a" 
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Create a DotNetObjectReference so JS can call us back
+            var dotNetHelper = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("registerGlobalKeyHandler", dotNetHelper);
+        }
+    }
+
+    [JSInvokable]
+    public async Task HandleKeyPress(string key)
+    {
+        _sequence.Add(key);
+
+        // Keep sequence buffer same size as Konami code
+        if (_sequence.Count > _konami.Count)
+        {
+            _sequence.RemoveAt(0);
+        }
+
+        // Check for match
+        if (IsMatch())
+        {
+            // Trigger the visual effect via JS
+            await Achievements.Unlock("retro_master", "Old School", "activated the Konami Code.");
+            await JS.InvokeVoidAsync("toggleCrtMode");
+            _sequence.Clear(); // Reset
+        }
+    }
+
+    private bool IsMatch()
+    {
+        if (_sequence.Count != _konami.Count) return false;
+        for (int i = 0; i < _konami.Count; i++)
+        {
+            if (_sequence[i] != _konami[i]) return false;
+        }
+        return true;
+    }
+}

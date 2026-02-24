@@ -1,0 +1,27 @@
+<MudTooltip Text="@Name">
+    <div class="inv-slot cursor-pointer">
+        <MudIcon Icon="@Icon" Size="Size.Medium" Color="Color.Primary" />
+    </div>
+</MudTooltip>
+
+<style>
+    .inv-slot {
+        width: 50px; height: 50px;
+        background: rgba(255,255,255,0.05);
+        border: 2px solid #333;
+        border-radius: 4px;
+        display: flex; align-items: center; justify-content: center;
+        transition: all 0.2s;
+    }
+    .inv-slot:hover {
+        border-color: #f6a91f;
+        background: rgba(246, 169, 31, 0.1);
+        transform: scale(1.1);
+        box-shadow: 0 0 10px rgba(246, 169, 31, 0.4);
+    }
+</style>
+
+@code {
+    [Parameter] public string Name { get; set; }
+    [Parameter] public string Icon { get; set; }
+}

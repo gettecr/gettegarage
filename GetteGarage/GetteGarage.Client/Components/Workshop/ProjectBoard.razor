@@ -1,0 +1,30 @@
+@using MudBlazor
+@rendermode InteractiveWebAssembly
+
+<!-- Moved from Projects.razor to here so it can be Interactive -->
+<MudTabs Elevation="4" Rounded="true" Color="Color.Surface" SliderColor="Color.Secondary" ApplyEffectsToContainer="true" PanelClass="pa-6">
+    
+    <MudTabPanel Text="ACTIVE TITLES" Icon="@Icons.Material.Filled.Work">
+        <MudGrid>
+            <MudItem xs="12" md="6">
+                <ProjectCard Title="Corporate Dashboard" Role="Full Stack Dev" Tech="Blazor, SQL, Azure"
+                             Desc="A high-traffic analytics dashboard used by 500+ employees." />
+            </MudItem>
+            <!-- Add more items here... -->
+        </MudGrid>
+    </MudTabPanel>
+
+    <MudTabPanel Text="PROTOTYPES AND R&D" Icon="@Icons.Material.Filled.Gamepad">
+        <MudGrid>
+            <MudItem xs="12" md="4">
+                <ProjectCard Title="Fishing RPG" Role="Blazor WASM" Tech="C#"
+                             Desc="An interactive idle game built into this site." />
+            </MudItem>
+        </MudGrid>
+    </MudTabPanel>
+
+    <MudTabPanel Text="LEGACY" Icon="@Icons.Material.Filled.Code">
+        <MudText>Foundational research and education.</MudText>
+    </MudTabPanel>
+
+</MudTabs>

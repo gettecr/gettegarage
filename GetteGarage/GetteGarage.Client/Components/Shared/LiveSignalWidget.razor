@@ -1,0 +1,61 @@
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Nav
+@rendermode InteractiveWebAssembly
+@implements IAsyncDisposable
+
+<div class="d-flex align-center">
+    <!-- Green pulsing dot -->
+    <div class="pulsing-dot mr-2"></div>
+    <MudText Typo="Typo.caption" Style="color:#00ff00; font-family: 'Press Start 2P'; font-size: 0.5rem;">
+        ACTIVE VISITORS: @_userCount
+    </MudText>
+</div>
+
+<style>
+    .pulsing-dot {
+        width: 8px; height: 8px; background: #00ff00; border-radius: 50%;
+        box-shadow: 0 0 5px #00ff00;
+        animation: hud-pulse 2s infinite;
+    }
+    @@keyframes hud-pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.3; }
+        100% { opacity: 1; }
+    }
+</style>
+
+@code {
+    private HubConnection? _hubConnection;
+    private int _userCount = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // 1. Build the connection to the Server
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(Nav.ToAbsoluteUri("/garagehub"))
+            .WithAutomaticReconnect()
+            .Build();
+
+        // 2. Listen for the specific message from the Server
+        _hubConnection.On<int>("UpdateUserCount", (count) =>
+        {
+            _userCount = count;
+            InvokeAsync(StateHasChanged);
+        });
+
+        // 3. Start the connection
+        try {
+            await _hubConnection.StartAsync();
+        } catch {
+            // Ignore if the server isn't ready yet
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.DisposeAsync();
+        }
+    }
+}

@@ -1,0 +1,144 @@
+@using MudBlazor
+@rendermode InteractiveWebAssembly
+
+<div class="game-overlay @(IsOpen ? "d-flex" : "d-none")" @onclick="Close">
+    <div class="game-window d-flex flex-column" @onclick:stopPropagation>
+        
+        <!-- HEADER BAR -->
+        <div class="d-flex justify-space-between align-center pa-2 header-bar flex-none">
+            <div class="d-flex align-center">
+                <!-- If inside a game, show EJECT button to go back to menu -->
+                @if(_currentMode != GameMode.Menu)
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.Eject" Color="Color.Warning" Size="Size.Small" OnClick="EjectCartridge" Class="mr-2"/>
+                }
+                <MudText Typo="Typo.caption" Color="Color.Secondary" Style="font-family: 'Press Start 2P'">
+                    @GetTitle()
+                </MudText>
+            </div>
+            <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Error" OnClick="Close" Size="Size.Small"/>
+        </div>
+        
+        <!-- 1. THE MENU SCREEN -->
+        @if (_currentMode == GameMode.Menu)
+        {
+            <div class="pa-4" style="background: #111; height: 100%;">
+                <MudText Typo="Typo.body1" Color="Color.Primary" Align="Align.Center" Class="mb-4 press-start">SELECT CARTRIDGE</MudText>
+                
+                <div class="game-viewport relative">
+                    <!-- Fishing Cartridge -->
+                    <div class="cartridge fishing-cart" @onclick="() => LoadGame(GameMode.Fishing)">
+                        <MudIcon Icon="@Icons.Material.Filled.Phishing" Size="Size.Large" />
+                        <div class="ml-4">
+                            <MudText Typo="Typo.subtitle2" Class="press-start">FISHING RPG</MudText>
+                            <MudText Typo="Typo.caption">v1.0 • AUTO-SAVE</MudText>
+                        </div>
+                    </div>
+
+                    <!-- Coding Cartridge -->
+                    <div class="cartridge coding-cart" @onclick="() => LoadGame(GameMode.Coding)">
+                        <MudIcon Icon="@Icons.Material.Filled.Code" Size="Size.Large" />
+                        <div class="ml-4">
+                            <MudText Typo="Typo.subtitle2" Class="press-start">DEV SIMULATOR</MudText>
+                            <MudText Typo="Typo.caption">v2.4 • HACKER MODE</MudText>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+
+        @if (_currentMode == GameMode.Fishing)
+        {
+            <FishingGame />
+        }
+
+        @if (_currentMode == GameMode.Coding)
+        {
+            <CodingGame />
+        }
+
+    </div>
+</div>
+
+<MudTooltip Text="Open Console">
+    <MudFab Color="Color.Primary" 
+            StartIcon="@Icons.Material.Filled.Gamepad" 
+            OnClick="Toggle" 
+            Style="position: fixed; bottom: 40px; right: 90px; z-index: 2001;" />
+</MudTooltip>
+
+<style>
+
+    .game-overlay {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(0,0,0,0.85); z-index: 2000;
+        display: flex; align-items: center; justify-content: center;
+        backdrop-filter: blur(5px);
+    }
+
+    .game-window {
+        width: 900px; 
+        max-width: 95vw;
+        height: 85vh; 
+        background: #0d1117;
+        border: 1px solid #30363d;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
+        border-radius: 6px;
+        overflow: hidden; /* Clips corners */
+    }
+
+    .header-bar { 
+        background: #161b22; 
+        border-bottom: 1px solid #30363d; 
+        height: 48px;
+        flex-shrink: 0; /* Never shrink the header */
+    }
+
+    .game-viewport {
+        flex-grow: 1;     /* Take all remaining height */
+        overflow-y: auto; /* Scroll INSIDE this box if needed */
+        overflow-x: hidden;
+        position: relative;
+        height: 100%;     /* Ensure it fills the parent */
+    }
+
+    /* Scrollbar styling for the viewport */
+    .game-viewport::-webkit-scrollbar { width: 8px; }
+    .game-viewport::-webkit-scrollbar-track { background: #0d1117; }
+    .game-viewport::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+    .press-start { font-family: 'Press Start 2P', cursive; }
+
+    /* Cartridge Styles */
+    .cartridge {
+        display: flex; align-items: center; padding: 15px;
+        border-radius: 4px; cursor: pointer;
+        transition: all 0.2s; border: 2px solid transparent;
+    }
+    .cartridge:hover { transform: translateX(5px); }
+    
+    .fishing-cart { background: #0d47a1; color: white; border: 2px solid #42a5f5; }
+    .fishing-cart:hover { background: #1565c0; box-shadow: 0 0 10px #42a5f5; }
+
+    .coding-cart { background: #1b5e20; color: #00ff00; border: 2px solid #00ff00; }
+    .coding-cart:hover { background: #2e7d32; box-shadow: 0 0 10px #00ff00; }
+</style>
+
+@code {
+    private bool IsOpen = false;
+    
+    enum GameMode { Menu, Fishing, Coding }
+    private GameMode _currentMode = GameMode.Menu;
+
+    private void Toggle() => IsOpen = !IsOpen;
+    private void Close() => IsOpen = false;
+
+    private void LoadGame(GameMode mode) => _currentMode = mode;
+    private void EjectCartridge() => _currentMode = GameMode.Menu;
+
+    private string GetTitle() => _currentMode switch {
+        GameMode.Fishing => "FISHING_RPG",
+        GameMode.Coding => "DEV_SIMULATOR",
+        _ => "GAME_SELECT"
+    };
+}
