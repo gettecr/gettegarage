@@ -18,6 +18,7 @@ builder.Services.AddMudServices();
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 builder.Services.AddScoped<GetteGarage.Client.Services.AchievementService>(); 
+builder.Services.AddSingleton<GetteGarage.Services.FishingLeaderboardService>();
 builder.Services.AddSingleton<HighScoreService>();
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
@@ -56,6 +57,7 @@ app.MapRazorComponents<App>()
     .AddAdditionalAssemblies(typeof(GetteGarage.Client._Imports).Assembly);
 
 app.MapHub<GarageHub>("/garagehub");
+app.MapControllers();
 
 app.Run();
 

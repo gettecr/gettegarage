@@ -16,13 +16,24 @@
             @Title
         </MudText>
 
-        @if (!string.IsNullOrEmpty(Url))
+         @if (!string.IsNullOrEmpty(StaticImage))
         {
-            <MudImage Src="@Url" 
-                      Fluid="true" 
-                      Height="160" 
-                      ObjectFit="ObjectFit.Cover" 
-                      Class="rounded-lg mb-3 my-image-border" />
+            <div class="image-wrapper rounded-lg mb-3 my-image-border @(!string.IsNullOrEmpty(AnimatedGif) ? "has-gif" : "")">
+                <MudImage Src="@StaticImage" 
+                          Fluid="true" 
+                          Height="160"
+                          ObjectFit="ObjectFit.Cover" 
+                          Class="static-image" />
+                
+                @if (!string.IsNullOrEmpty(AnimatedGif))
+                {
+                    <MudImage Src="@AnimatedGif" 
+                              Fluid="true" 
+                              ObjectFit="ObjectFit.Cover"
+                              Height="160" 
+                              Class="animated-image" />
+                }
+            </div>
         }
 
         <!-- Description -->
@@ -61,12 +72,45 @@
         box-shadow: 0 0 20px rgba(246, 169, 31, 0.15);
     }
     .press-start-chip { font-family: 'Press Start 2P'; font-size: 0.6rem; }
+
+
+    .image-wrapper {
+        position: relative;
+        display: block;
+        overflow: hidden;
+    }
+
+    .static-image {
+        display: block;
+        width: 100%;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .animated-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    /* On Card Hover: Hide static image, show GIF */
+    .studio-card:hover .has-gif .static-image {
+        opacity: 0;
+    }
+
+    .studio-card:hover .animated-image {
+        opacity: 1;
+    }
 </style>
 
 @code {
     [Parameter] public string Title { get; set; }
     [Parameter] public string Version { get; set; }
-    [Parameter] public string Url {get; set;}
+    [Parameter] public string StaticImage {get; set;}
+    [Parameter] public string AnimatedGif {get; set;}
     [Parameter] public string Status { get; set; }
     [Parameter] public Color StatusColor { get; set; }
     [Parameter] public string Description { get; set; }

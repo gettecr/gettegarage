@@ -1,0 +1,107 @@
+@using GetteGarage.Client.Models
+
+<div class="fishing-scene" style="@GetBackgroundStyle()">
+    
+    @if (string.IsNullOrEmpty(Theme?.BackgroundUrl))
+    {
+        <div class="sun"></div>
+        <div class="cloud" style="top: 15px; left: 30px;"></div>
+        <div class="cloud" style="top: 40px; left: 200px; transform: scale(1.5);"></div>
+    }
+
+    <div class="water" style="@GetWaterStyle()"></div>
+
+    <div class="fisherman @(IsCasting ? "cast-pose" : "")">
+        @if (!string.IsNullOrEmpty(GetFishermanImage()))
+        {
+            <img src="@GetFishermanImage()" style="height: 80px; width: auto;" />
+        }
+        else
+        {
+            <span style="font-size: 3.5rem; text-shadow: 2px 2px 0px #000;">@(IsCasting ? "🎣" : "🧍")</span>
+        }
+    </div>
+
+    @if (State != GameState.Idle)
+    {
+        <div class="bobber @(State == GameState.Minigame ? "bobber-sink" : "bobber-float")" 
+             style="left: @(BobberX)%;">
+            @if(!string.IsNullOrEmpty(ActiveRod?.BobberSpriteUrl)) {
+                <img src="@ActiveRod.BobberSpriteUrl" width="20" />
+            } else {
+                <span style="font-size: 1.5rem; text-shadow: 1px 1px 0px #000;">🔴</span>
+            }
+        </div>
+    }
+
+    @if (ShowSplash)
+    {
+        <div class="splash-effect text-center" style="left: @(BobberX)%">
+            @if(!string.IsNullOrEmpty(SplashMessage))
+            {
+                <span class="catch-text text-error">@SplashMessage</span>
+            }
+            else if (LastCatch != null)
+            {
+                @if(!string.IsNullOrEmpty(LastCatch.SpriteUrl)) {
+                    <img src="@LastCatch.SpriteUrl" width="50" /><br/>
+                } else {
+                    <span style="font-size: 2rem;">💦</span><br/>
+                }
+                <span class="catch-text text-warning">@LastCatch.Name</span><br/>
+                <span class="catch-text text-white">@(LastCatch.Length.ToString("F2")) cm</span>
+            }
+        </div>
+    }
+
+    @ChildContent
+</div>
+
+<style>
+    .fishing-scene {
+        position: relative; 
+        height: 280px; 
+        width: 100%;
+        background: linear-gradient(to bottom, #87CEEB 0%, #E0F7FA 50%, #006994 50%, #003366 100%);
+        background-size: cover; background-position: center;
+        overflow: hidden; border-bottom: 4px solid #111; outline: none;
+    }
+    
+    .sun { position: absolute; top: 15px; right: 25px; width: 45px; height: 45px; background: #FFD700; border-radius: 50%; box-shadow: 0 0 20px #FFD700; z-index: 1; }
+    .cloud { position: absolute; width: 50px; height: 15px; background: rgba(255,255,255,0.8); border-radius: 10px; z-index: 1; }
+    
+    .water { position: absolute; bottom: 0; width: 100%; height: 45%; background: rgba(0,0,255,0.1); animation: wave 3s infinite linear; z-index: 2; }
+    
+    .fisherman { position: absolute; bottom: 40%; left: 10%; transition: transform 0.2s; z-index: 5; }
+    .cast-pose { transform: rotate(-10deg) translateY(5px); }
+    
+    .bobber { position: absolute; bottom: 40%; transition: bottom 0.2s; z-index: 5; }
+    .bobber-float { animation: bob 2s infinite ease-in-out; }
+    .bobber-sink { bottom: 25% !important; animation: shake 0.1s infinite; }
+    
+    .splash-effect {
+        position: absolute; bottom: 45%; transform: translateX(-50%);
+        font-weight: bold; text-shadow: 2px 2px black; animation: floatUp 2s forwards; z-index: 6;
+    }
+    .catch-text { font-family: 'Press Start 2P', cursive; font-size: 0.7rem; }
+
+    @@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+    @@keyframes shake { 0%, 100% { transform: translateX(-2px); } 50% { transform: translateX(2px); } }
+    @@keyframes floatUp { 0% { opacity: 1; transform: translateY(0) translateX(-50%); } 100% { opacity: 0; transform: translateY(-50px) translateX(-50%); } }
+</style>
+
+@code {
+    [Parameter] public VisualTheme Theme { get; set; } = new();
+    [Parameter] public GameState State { get; set; }
+    [Parameter] public RodDef ActiveRod { get; set; }
+    [Parameter] public bool IsCasting { get; set; }
+    [Parameter] public int BobberX { get; set; }
+    [Parameter] public CaughtFish LastCatch { get; set; }
+    [Parameter] public bool ShowSplash { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public string SplashMessage { get; set; }
+
+    private string GetBackgroundStyle() => string.IsNullOrEmpty(Theme?.BackgroundUrl) ? "" : $"background-image: url('{Theme.BackgroundUrl}');";
+    private string GetWaterStyle() => string.IsNullOrEmpty(Theme?.WaterOverlayUrl) ? "" : $"background-image: url('{Theme.WaterOverlayUrl}'); background-repeat: repeat-x;";
+    private string GetFishermanImage() => IsCasting ? Theme?.FishermanCastUrl : Theme?.FishermanIdleUrl;
+}
