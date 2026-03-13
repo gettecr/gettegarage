@@ -179,7 +179,7 @@
     {
         _isPopping = false;
         await InvokeAsync(StateHasChanged);
-        await Task.Delay(1);
+        await Task.Delay(10);
 
         var pool = ActiveRod.Difficulty switch { QteDifficulty.Easy => QteEasy, QteDifficulty.Medium => QteEasy, QteDifficulty.Hard => QteMedium, QteDifficulty.Expert => QteExpert, _ => QteEasy };
         _qteTargetKey = pool[new Random().Next(pool.Length)];
