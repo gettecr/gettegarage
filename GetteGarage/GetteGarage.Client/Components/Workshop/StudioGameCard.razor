@@ -50,8 +50,8 @@
             
             @if(!string.IsNullOrEmpty(PlayLink))
             {
-                <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="@PlayLink" Size="Size.Small">
-                    LAUNCH
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="@PlayLink" Size="Size.Small" Disabled=@DisableButton>
+                    @ButtonText
                 </MudButton>
             }
         </div>
@@ -116,4 +116,7 @@
     [Parameter] public string Description { get; set; }
     [Parameter] public string TechStack { get; set; }
     [Parameter] public string PlayLink { get; set; }
+
+    [Parameter] public bool DisableButton {get; set;} = false;
+    [Parameter] public string ButtonText {get; set;}
 }
