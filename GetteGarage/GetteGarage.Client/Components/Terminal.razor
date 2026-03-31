@@ -4,20 +4,16 @@
 @rendermode InteractiveWebAssembly
 @inject AchievementService Achievements
 
-
-@if (IsOpen)
-{
-    <div class="terminal-overlay" @onclick="Close">
-        <!-- @onclick:stopPropagation prevents clicking the window from closing it -->
-        <MudPaper Class="terminal-window pa-4" Elevation="25" @onclick:stopPropagation>
-            
+<MudDialog Class="terminal-dialog-frame">
+    <DialogContent>
+        <div class="terminal-window">
             <div class="d-flex justify-space-between mb-2">
                 <MudText Typo="Typo.caption" Color="Color.Success" Style="font-family: monospace;">gettegarage@terminal:~$</MudText>
                 <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" OnClick="Close" Color="Color.Error" />
             </div>
             
             <!-- Output History -->
-            <div class="terminal-history mb-2">
+            <div class="terminal-history mb-2 custom-scroll">
                 @foreach (var line in History)
                 {
                     <div class="@line.CssClass">@((MarkupString)line.Text)</div>
@@ -34,32 +30,20 @@
                        placeholder="Type 'help'..." 
                        autofocus />
             </div>
-        </MudPaper>
-    </div>
-}
-
-<!-- 
-    The Trigger Button 
-    FIX: Z-Index set to 2001 so it sits ABOVE the overlay.
--->
-<MudTooltip Text="Open Terminal">
-    <MudFab Color="Color.Secondary" 
-            StartIcon="@Icons.Material.Filled.Terminal" 
-            OnClick="Toggle" 
-            Style="position: fixed; bottom: 40px; right: 20px; z-index: 2001;" />
-</MudTooltip>
+        </div>
+    </DialogContent>
+</MudDialog>
 
 <style>
-    .terminal-overlay {
-        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background: rgba(0,0,0,0.6); z-index: 2000;
-        display: flex; align-items: center; justify-content: center;
-        backdrop-filter: blur(2px);
+    /* Force the MudDialog to look like a terminal */
+    .terminal-dialog-frame {
+        background: #1e1e1e !important;
+        border: 1px solid #333 !important;
+        max-width: 650px !important;
     }
     .terminal-window {
-        width: 600px; height: 400px; background-color: #1e1e1e; color: #00ff00;
+        height: 400px; color: #00ff00;
         font-family: 'Courier New', monospace; display: flex; flex-direction: column;
-        border: 1px solid #333;
     }
     .terminal-history { flex-grow: 1; overflow-y: auto; font-size: 0.9rem; }
     .terminal-input {
@@ -68,38 +52,20 @@
     .text-success { color: #2ecc71; }
     .text-warning { color: #f1c40f; }
     .text-info    { color: #3498db; }
-    
-    /* Custom Scrollbar */
-    .terminal-history::-webkit-scrollbar { width: 8px; }
-    .terminal-history::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
 </style>
 
 @code {
-    private bool IsOpen = false;
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    
     private string CurrentInput = "";
     private ElementReference inputElement;
     
     class TermLine { public string Text { get; set; } public string CssClass { get; set; } }
-    private List<TermLine> History = new();
+    private List<TermLine> History = new() {
+        new TermLine { Text = "Welcome to GETTEGARAGEOS v1.0. Type <b>help</b> for commands.", CssClass = "text-info" }
+    };
 
-    private async Task Toggle()
-    {
-        IsOpen = !IsOpen;
-        if(IsOpen) 
-        {
-            History.Clear();
-            History.Add(new TermLine { Text = "Welcome to GETTEGARAGEOS v1.0. Type <b>help</b> for commands.", CssClass = "text-info" });
-            
-            // Small delay to let the DOM render before focusing input
-            await Task.Delay(50);
-            await inputElement.FocusAsync();
-        }
-    }
-
-    private void Close()
-    {
-        IsOpen = false;
-    }
+    private void Close() => MudDialog.Cancel();
 
     private async Task HandleKeyUp(KeyboardEventArgs e)
     {

@@ -1,0 +1,153 @@
+@using MudBlazor
+@rendermode InteractiveWebAssembly
+@inject IDialogService DialogService
+
+<div class="command-menu-container @(_isOpen ? "open" : "")">
+    
+    <!-- The Expanding Menu Items -->
+    <div class="command-items">
+        
+        <!-- 1. Contact -->
+        <div class="menu-item-wrapper item-1">
+            <!-- Clicking the label also works -->
+            <span class="menu-label" @onclick="OpenContact">CONTACT</span>
+            <MudFab Color="Color.Secondary" Size="Size.Small" 
+                    StartIcon="@Icons.Material.Filled.WifiTethering" 
+                    OnClick="OpenContact" 
+                    Class="menu-fab" />
+        </div>
+
+        <!-- 2. Idle Game -->
+        <div class="menu-item-wrapper item-2">
+            <span class="menu-label" @onclick="OpenGame">GAMES</span>
+            <MudFab Color="Color.Primary" Size="Size.Small" 
+                    StartIcon="@Icons.Material.Filled.Gamepad" 
+                    OnClick="OpenGame" 
+                    Class="menu-fab" />
+        </div>
+
+        <!-- 3. Terminal -->
+        <div class="menu-item-wrapper item-3">
+            <span class="menu-label" @onclick="OpenTerminal">CONSOLE</span>
+            <MudFab Color="Color.Tertiary" Size="Size.Small" 
+                    StartIcon="@Icons.Material.Filled.Terminal" 
+                    OnClick="OpenTerminal" 
+                    Class="menu-fab" />
+        </div>
+
+    </div>
+
+    <!-- The Main Toggle Button -->
+    <MudFab Color="@(_isOpen ? Color.Error : Color.Primary)" 
+            StartIcon="@(_isOpen ? Icons.Material.Filled.Close : Icons.Material.Filled.Add)" 
+            OnClick="ToggleMenu" 
+            Class="main-fab" />
+
+</div>
+
+<style>
+    /* Container sits fixed in the bottom right */
+    .command-menu-container {
+        position: fixed;
+        bottom: 40px;
+        right: 40px;
+        z-index: 2001;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 15px;
+    }
+
+    /* The Main Button Rotation */
+    .main-fab {
+        z-index: 10;
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .command-menu-container.open .main-fab {
+        transform: rotate(90deg); 
+    }
+
+    /* Hidden Buttons Wrapper */
+    .command-items {
+        position: absolute;
+        bottom: 70px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 15px;
+        pointer-events: none; /* Disable clicks when closed */
+    }
+
+    .menu-item-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        opacity: 0;
+        transform: translateY(20px) scale(0.5);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .menu-label {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.6rem;
+        color: #f6a91f;
+        background: rgba(0,0,0,0.8);
+        padding: 6px 10px;
+        border: 1px solid #333;
+        border-radius: 4px;
+        white-space: nowrap;
+        pointer-events: none;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    .command-menu-container.open .command-items { pointer-events: auto; }
+    .command-menu-container.open .menu-item-wrapper { opacity: 1; transform: translateY(0) scale(1); }
+
+    /* Staggered entry */
+    .command-menu-container.open .item-3 { transition-delay: 0.0s; }
+    .command-menu-container.open .item-2 { transition-delay: 0.05s; }
+    .command-menu-container.open .item-1 { transition-delay: 0.1s; }
+
+    /* Hover effect for the whole row */
+    .menu-item-wrapper:hover .menu-label {
+        color: #fff;
+        border-color: #f6a91f;
+        background: #121324;
+    }
+    
+    .menu-item-wrapper:hover .menu-fab {
+        transform: scale(1.1);
+    }
+
+    @@media (max-width: 600px) {
+        .command-menu-container { bottom: 15px; right: 15px; }
+        .main-fab { transform: scale(0.9); }
+        /* Hide labels on very small screens if they overlap too much */
+        /* .menu-label { display: none; } */
+    }
+</style>
+
+@code {
+    private bool _isOpen = false;
+    private void ToggleMenu() => _isOpen = !_isOpen;
+
+    private async Task OpenTerminal() {
+        _isOpen = false;
+        var options = new DialogOptions { NoHeader = true, MaxWidth = MaxWidth.Medium, FullWidth = true, BackdropClick = true };
+        await DialogService.ShowAsync<Terminal>("", options);
+    }
+
+    private async Task OpenGame() {
+        _isOpen = false;
+        var options = new DialogOptions { NoHeader = true, MaxWidth = MaxWidth.Medium, FullWidth = true, BackdropClick = true };
+        await DialogService.ShowAsync<IdleGame.GlobalIdleGame>("", options);
+    }
+
+    private async Task OpenContact() {
+        _isOpen = false;
+        var options = new DialogOptions { NoHeader = true, MaxWidth = MaxWidth.Small, FullWidth = true, BackdropClick = true };
+        await DialogService.ShowAsync<ContactDialog>("", options);
+    }
+}
