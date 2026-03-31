@@ -11,7 +11,7 @@
 <GetteGarage.Client.Components.InteractiveProviders @rendermode="InteractiveWebAssembly" />
 
 <MudLayout>
-    <GetteGarage.Client.Components.Shared.RetroBackground />
+    
     
     <!-- 
         HUD TOP BAR (Navigation)
@@ -19,31 +19,7 @@
     -->
     @if (Nav.Uri.EndsWith("/") == false)
     {
-        <MudAppBar Elevation="0" Fixed="true" 
-                   Style="background: rgba(5, 5, 16, 0.9); backdrop-filter: blur(8px); border-bottom: 1px solid #333; height: 64px;">
-            
-            <!-- Home Icon -->
-            <MudIconButton Icon="@Icons.Material.Filled.Home" Color="Color.Primary" Edge="Edge.Start" Href="/" />
-            
-            <!-- Current "OS" Status -->
-            <MudText Typo="Typo.button" Class="ml-4 d-none d-sm-flex" Color="Color.Inherit" Style="font-family: 'Press Start 2P'; font-size: 0.8rem;">
-                GETTEGARAGE // @GetSectionTitle()
-            </MudText>
-
-            <MudSpacer />
-
-            <!-- Desktop Links -->
-            <div class="d-none d-md-flex gap-4">
-                <MudButton Href="/workshop" Color="Color.Inherit" Variant="Variant.Text">WORKSHOP</MudButton>
-                <MudButton Href="/blog" Color="Color.Inherit" Variant="Variant.Text">DEV_LOG</MudButton>
-                <MudButton Href="/arcade" Color="Color.Inherit" Variant="Variant.Text">ARCADE</MudButton>
-                <MudButton Href="/about" Color="Color.Inherit" Variant="Variant.Text">CREDITS</MudButton>
-                <MudButton Href="/community" Color="Color.Inherit" Variant="Variant.Text">NETWORK</MudButton>
-                <GetteGarage.Client.Components.Shared.LiveSignalWidget />
-            </div>
-            
-
-        </MudAppBar>
+        <GetteGarage.Client.Components.Shared.InteractiveNav />
     }
 
     <MudMainContent>
@@ -52,6 +28,7 @@
     
     <GetteGarage.Client.Components.Shared.CommandMenu />
     <GetteGarage.Client.Components.Shared.KonamiListener />
+    <GetteGarage.Client.Components.Shared.RetroBackground />
 
     <MudAppBar Bottom="true" Fixed="true" Elevation="0" 
            Style="background: #000; border-top: 1px solid #333; height: 30px; min-height: 30px;">
@@ -97,6 +74,13 @@
 </style>
 
 @code {
+
+    bool _drawerOpen = false;
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
     
     private MudTheme GameTheme = CreateGameTheme();
 
@@ -152,18 +136,5 @@
         return theme;
     }
 
-    private string GetSectionTitle()
-    {
-        if (Nav == null) return "LOADING...";
-        
-        // Simple logic to change the "OS" title based on URL
-        var uri = Nav.Uri.ToLower();
-        if (uri.Contains("/workshop")) return "WORKSHOP";
-        if (uri.Contains("/blog")) return "DEV_LOG";
-        if (uri.Contains("/arcade")) return "ARCADE";
-        if (uri.Contains("/about")) return "CREDITS";
-        if (uri.Contains("/community")) return "NETWORK";
-        
-        return "HOME";
-    }
+    
 }

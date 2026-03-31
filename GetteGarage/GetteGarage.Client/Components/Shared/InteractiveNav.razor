@@ -1,0 +1,81 @@
+@using MudBlazor
+@inject NavigationManager Nav
+@rendermode InteractiveWebAssembly
+
+<MudAppBar Elevation="0" Fixed="true" 
+                   Style="background: rgba(5, 5, 16, 0.9); backdrop-filter: blur(8px); border-bottom: 1px solid #333; height: 64px;">
+
+
+    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" 
+                    Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" 
+                    Class="d-flex d-md-none" />
+
+    <MudIconButton Icon="@Icons.Material.Filled.Home" Color="Color.Primary" 
+                    Edge="Edge.Start" Href="/" Class="d-none d-md-flex" />
+    
+    <MudText Typo="Typo.button" Class="ml-4 d-none d-sm-flex" Color="Color.Inherit" 
+                Style="font-family: 'Press Start 2P'; font-size: 0.8rem;">
+        GETTEGARAGE // @GetSectionTitle()
+    </MudText>
+
+    <MudSpacer />
+
+    <!-- Desktop Links -->
+    <div class="d-none d-md-flex gap-4">
+        <MudButton Href="/workshop" Color="Color.Inherit" Variant="Variant.Text">WORKSHOP</MudButton>
+        <MudButton Href="/blog" Color="Color.Inherit" Variant="Variant.Text">DEV_LOG</MudButton>
+        <MudButton Href="/arcade" Color="Color.Inherit" Variant="Variant.Text">ARCADE</MudButton>
+        <MudButton Href="/about" Color="Color.Inherit" Variant="Variant.Text">CREDITS</MudButton>
+        <MudButton Href="/community" Color="Color.Inherit" Variant="Variant.Text">COMMUNITY</MudButton>
+        <GetteGarage.Client.Components.Shared.LiveSignalWidget />
+    </div>
+            
+
+</MudAppBar>
+
+<MudDrawer @bind-Open="_drawerOpen" Elevation="1" Anchor="Anchor.Left" 
+            Variant="@DrawerVariant.Temporary" 
+            Style="background: #050510; border-right: 1px solid #333; width: 250px;">
+    
+    <MudDrawerHeader Class="pa-4" Style="border-bottom: 1px solid #333;">
+        <MudText Typo="Typo.h6" Color="Color.Primary" Style="font-family: 'Press Start 2P'; font-size: 0.7rem;">
+            MAIN MENU
+        </MudText>
+    </MudDrawerHeader>
+    
+    <MudNavMenu Class="pa-2">
+        <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home" Match="NavLinkMatch.All">HOME</MudNavLink>
+        <MudDivider Class="my-2" />
+        <MudNavLink Href="/workshop" Icon="@Icons.Material.Filled.Work">WORKSHOP</MudNavLink>
+        <MudNavLink Href="/blog" Icon="@Icons.Material.Filled.Book">DEV_LOG</MudNavLink>
+        <MudNavLink Href="/arcade" Icon="@Icons.Material.Filled.Gamepad">ARCADE</MudNavLink>
+        <MudNavLink Href="/about" Icon="@Icons.Material.Filled.Person">CREDITS</MudNavLink>
+        <MudNavLink Href="/community" Icon="@Icons.Material.Filled.Public">COMMUNITY</MudNavLink>
+    </MudNavMenu>
+</MudDrawer>
+
+@code {
+
+    bool _drawerOpen = false;
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private string GetSectionTitle()
+    {
+        if (Nav == null) return "LOADING...";
+        
+        // Simple logic to change the "OS" title based on URL
+        var uri = Nav.Uri.ToLower();
+        if (uri.Contains("/workshop")) return "WORKSHOP";
+        if (uri.Contains("/blog")) return "DEV_LOG";
+        if (uri.Contains("/arcade")) return "ARCADE";
+        if (uri.Contains("/about")) return "CREDITS";
+        if (uri.Contains("/community")) return "COMMUNITY";
+        
+        return "HOME";
+    }
+
+}
