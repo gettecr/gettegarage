@@ -369,3 +369,8 @@ FodyWeavers.xsd
 
 # MudTemplatesTesting
 tests/
+
+#database
+*.db
+*.db-shm
+*.db-wal

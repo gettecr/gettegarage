@@ -1,65 +1,133 @@
-using System.Xml;
-using System.ServiceModel.Syndication;
 using System.Text.Json;
+using GetteGarage.Data;
+using GetteGarage.Models;
 
 namespace GetteGarage.Services
 {
     public class BlogService
     {
-        public async Task<List<BlogPost>> GetPostsAsync()
-{
-    // Use rss2json to proxy the request (Bypasses IP Blocks & CORS)
-    string targetUrl = "https://gettegarage.substack.com/feed";
-    string apiUrl = $"https://api.rss2json.com/v1/api.json?rss_url={targetUrl}";
+        private readonly IServiceScopeFactory _scopeFactory;
 
-    try 
-    {
-        using var client = new HttpClient();
-        var json = await client.GetStringAsync(apiUrl);
-        
-        // Deserializing the JSON response
-        var data = System.Text.Json.JsonSerializer.Deserialize<RssRoot>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        
-
-        return data.Items.Select(item => 
+        // We use IServiceScopeFactory because BlogService might be registered as a Singleton,
+        // but GameDbContext is Scoped. This safely creates a short-lived DB connection.
+        public BlogService(IServiceScopeFactory scopeFactory)
         {
-        
-            string slug = "post";
+            _scopeFactory = scopeFactory;
+        }
+
+        public async Task<List<BlogPost>> GetPostsAsync(bool forceRefresh = false)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<GameDbContext>();
+
+            // CHECK THE CACHE 
+            var cache = db.BlogCache.FirstOrDefault(c => c.Id == 1);
+            
+            // If cache exists, is less than 24 hours old, and we aren't forcing a refresh, use it!
+            if (cache != null && !forceRefresh && (DateTime.UtcNow - cache.LastUpdated).TotalHours < 24)
+            {
+                try
+                {
+                    var cachedPosts = JsonSerializer.Deserialize<List<BlogPost>>(cache.SerializedPosts);
+                    if (cachedPosts != null && cachedPosts.Any())
+                    {
+                        return cachedPosts; 
+                    }
+                }
+                catch { /* If deserialization fails, fall through to fetch fresh data */ }
+            }
+
+            // FETCH FRESH DATA FROM EXTERNAL API
+            string targetUrl = "https://gettegarage.substack.com/feed";
+            string apiUrl = $"https://api.rss2json.com/v1/api.json?rss_url={targetUrl}";
+            var freshPosts = new List<BlogPost>();
+            
+
             try 
             {
-                if (!string.IsNullOrEmpty(item.Link))
+                using var client = new HttpClient();
+                client.Timeout = TimeSpan.FromSeconds(10); // Don't hang forever
+                
+                var json = await client.GetStringAsync(apiUrl);
+                var data = JsonSerializer.Deserialize<RssRoot>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                
+                if (data?.Items != null)
                 {
-                    var uri = new Uri(item.Link);
-                    // Get the last part of the URL path
-                    slug = uri.Segments.Last().Trim('/');
+                    freshPosts = data.Items.Select(item => 
+                    {
+                        // Slug parsing logic
+                        string slug = "post";
+                        try 
+                        {
+                            if (!string.IsNullOrEmpty(item.Link)) {
+                                var uri = new Uri(item.Link);
+                                slug = uri.Segments.Last().Trim('/');
+                            }
+                        }
+                        catch { slug = Math.Abs(item.Title.GetHashCode()).ToString(); }
+
+                        string imageUrl = "";
+
+                        // Try the Enclosure Link first
+                        if (item.Enclosure != null && !string.IsNullOrWhiteSpace(item.Enclosure.Link))
+                        {
+                            imageUrl = item.Enclosure.Link;
+                        }
+                        // Fallback to Thumbnail if Enclosure is missing
+                        else if (!string.IsNullOrWhiteSpace(item.Thumbnail))
+                        {
+                            imageUrl = item.Thumbnail;
+                        }
+
+                        return new BlogPost
+                        {
+                            Title = item.Title,
+                            Link = item.Link,
+                            PubDate = DateTime.TryParse(item.PubDate, out var date) ? date : DateTime.UtcNow,
+                            Summary = item.Description, 
+                            Content = item.Content,
+                            ImageUrl = imageUrl, 
+                            Slug = slug
+                        };
+                    }).ToList();
+                }
+
+                foreach(var post in freshPosts)
+                {
+                    Console.WriteLine($"[DEBUG] Title: {post.Title} | ImageUrl: {post.ImageUrl}");
                 }
             }
-            catch 
+            catch (Exception ex)
             {
-                // Fallback: Use Hash of title if URL is weird
-                slug = Math.Abs(item.Title.GetHashCode()).ToString();
+                // If the external API fails, but we have an old cache, return the stale cache anyway!
+                if (cache != null)
+                {
+                    var stalePosts = JsonSerializer.Deserialize<List<BlogPost>>(cache.SerializedPosts);
+                    if (stalePosts != null) return stalePosts;
+                }
+
+                // Absolute worst case: return the error so you can see it
+                return new List<BlogPost> { new BlogPost { Title = "Network Error", Summary = ex.Message, Slug = "error" } };
             }
-        return new BlogPost
-        {
 
-            
-            Title = item.Title,
-            Link = item.Link,
-            PubDate = DateTime.Parse(item.PubDate),
-            Summary = item.Description, // rss2json puts summary in description
-            Content = item.Content,
-            Slug = slug,
-            ImageUrl = item.Thumbnail
-        };
-    }).ToList();
-    }
-    catch (Exception ex)
-    {
-        return new List<BlogPost> { new BlogPost { Title = "Proxy Error", Summary = ex.Message, PubDate = DateTime.Now } };
-    }
-}
+            // SAVE TO CACHE
+            if (freshPosts.Any())
+            {
+                if (cache == null)
+                {
+                    cache = new BlogCacheRecord { Id = 1 };
+                    db.BlogCache.Add(cache);
+                }
 
-        // Helper classes for JSON
+                cache.LastUpdated = DateTime.UtcNow;
+                cache.SerializedPosts = JsonSerializer.Serialize(freshPosts);
+                
+                await db.SaveChangesAsync();
+            }
+
+            return freshPosts;
+        }
+
         class RssRoot { public List<RssItem> Items { get; set; } }
         class RssItem 
         { 
@@ -69,18 +137,24 @@ namespace GetteGarage.Services
             public string Description { get; set; }
             public string Content { get; set; }
             public string Thumbnail { get; set; }
+            public EnclosureObject Enclosure { get; set; } 
         }
-            }
-}
+
+        class EnclosureObject
+        {
+            public string Link { get; set; } 
+            public string Type { get; set; } 
+        }
+    }
 
     public class BlogPost
-{
-        public string Title { get; set; }
-        public string Link { get; set; } // The Substack URL
+    {
+        public string Title { get; set; } = "";
+        public string Link { get; set; } = "";
         public DateTime PubDate { get; set; }
-        public string Summary { get; set; }
-        public string Content { get; set; } // The full HTML content
-
-        public string Slug { get; set; }
-        public string ImageUrl { get; set; }
+        public string Summary { get; set; } = "";
+        public string Content { get; set; } = "";
+        public string Slug { get; set; } = "";
+        public string ImageUrl { get; set; } = "";
+    }
 }

@@ -5,6 +5,8 @@ using GetteGarage.Services;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.EntityFrameworkCore;
+using GetteGarage.Data;
 using GetteGarage.Hubs;
 
 
@@ -18,10 +20,19 @@ builder.Services.AddMudServices();
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 builder.Services.AddScoped<GetteGarage.Client.Services.AchievementService>(); 
-builder.Services.AddSingleton<GetteGarage.Services.FishingLeaderboardService>();
+builder.Services.AddScoped<GetteGarage.Services.FishingLeaderboardService>();
 builder.Services.AddSingleton<HighScoreService>();
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
+
+var connectionString = builder.Configuration.GetConnectionString("GameDatabase");
+
+builder.Services.AddDbContext<GameDbContext>(options =>
+    options.UseSqlite(connectionString));
+
+// Register the Service (Changed from Singleton to Scoped because DbContext is Scoped)
+builder.Services.AddScoped<GetteGarage.Services.FishingLeaderboardService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -58,6 +69,13 @@ app.MapRazorComponents<App>()
 
 app.MapHub<GarageHub>("/garagehub");
 app.MapControllers();
+
+// Ensure the database exists
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<GameDbContext>();
+    db.Database.EnsureCreated();
+}
 
 app.Run();
 
