@@ -6,11 +6,21 @@
         <div class="blueprint-grid"></div>
         
         <!-- The Image -->
+        @if(!string.IsNullOrEmpty(@Item.ArtImage))
+        {
+            DisplayImageUrl = @Item.ArtImage;
+        }
+        else if(!string.IsNullOrEmpty(@Item.CoverImage))
+        {
+            DisplayImageUrl = @Item.CoverImage;
+        }
+        
         <div class="d-flex justify-center" style="position: relative; z-index: 2;">
-            <MudImage Src="@Item.Url" ObjectFit="ObjectFit.Contain" 
+            <MudImage Src="@DisplayImageUrl" ObjectFit="ObjectFit.Contain" 
                       Style="max-height: 70vh; max-width: 100%; border: 1px solid #f6a91f;" 
                       Class="blueprint-img"/>
         </div>
+        
 
         <!-- Meta Data Panel -->
         <div class="mt-4 pa-3" style="border-top: 2px dashed #cf4024; font-family: 'Rajdhani'; color: #f6a91f;">
@@ -48,4 +58,6 @@
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
     [Parameter] public WorkshopBoard.ArtItem Item { get; set; }
     void Close() => MudDialog.Close(DialogResult.Ok(true));
+
+    private string DisplayImageUrl = "";
 }

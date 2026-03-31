@@ -60,7 +60,7 @@
                 Description="This website. Full-stack .NET web app."
                 TechStack=".NET 8, Azure"
                 StaticImage="/art/gettegarage.png"
-                ButtonText="HOME PAGE"
+                ButtonText="CODE BASE"
                 PlayLink="https://github.com/gettecr/gettegarage" />
         </MudItem>
     </MudGrid>
@@ -130,7 +130,7 @@
                 Version="CONCEPT" Status="R&D" StatusColor="Color.Secondary"
                 Description="Raccoon jump good in a DK '94 style platformer"
                 TechStack="Godot 4"
-                ButtonText="COMING SOON"
+                ButtonText="CONCEPT"
                 DisableButton=true
                 PlayLink="#" />
         </MudItem>
@@ -174,7 +174,7 @@
         {
             <MudItem xs="12" sm="6" md="4">
                 <MudCard Elevation="3" Class="cursor-pointer hover-zoom" @onclick="() => OpenImage(item)" Style="background: #0a0a1f; border: 1px solid #333;">
-                    <MudCardMedia Image="@item.Url" Height="250" Style="background-size: cover;" />
+                    <MudCardMedia Image="@item.CoverImage" Height="250" Style="background-size: cover;" />
                     <MudCardContent>
                         <MudText Typo="Typo.h6" Style="font-family: 'Rajdhani'; font-weight: bold; color: #e0e0e0;">@item.Title</MudText>
                         <MudText Typo="Typo.body2" Color="Color.Secondary" Style="font-family: monospace;">@item.Category</MudText>
@@ -258,16 +258,22 @@
     {
         public string Title { get; set; } = "";
         public string Category { get; set; } = ""; 
-        public string Url { get; set; } = "";
+        public string CoverImage { get; set; } = "";
+        public string ArtImage {get; set;} = "";
+
         public string Description { get; set; } = "";
     }
 
     // 2. The Data List
     private List<ArtItem> PortfolioItems = new List<ArtItem>
     {
-        new ArtItem { Title = "Cyberpunk City", Category = "Concept Art", Url = "/art/sanctuary_sketch_artopoeia_palette.png", Description = "A dystopian future city." },
-        new ArtItem { Title = "Hero Sprite", Category = "Pixel Art", Url = "/art/sprite.png", Description = "Main character walk cycle." },
-        new ArtItem { Title = "Space Station", Category = "3D Render", Url = "/art/station.jpg", Description = "Blender render of the station." },
+        
+        new ArtItem { Title = "Big Larry Animation", Category = "Pixel Art", CoverImage = "/art/big_larry_share.png",ArtImage = "/art/big_larry_share.gif", Description = "Big Larry's one-handed swing animation." },
+        new ArtItem { Title = "For The Birds - Henry Animation", Category = "Pixel Art",CoverImage = "/art/prototype_henry_share.png", ArtImage = "/art/prototype_henry_share.gif", Description = "Run animation for 'Henry'- protagonist of For The Birds." },
+        new ArtItem {Title = "Rexi pixel art -- OPM", Category = "Pixel Art", CoverImage = "art/opm_pixel_art.png", Description="Various versions of Rexi, the chatbot mascot I made for OPM."},
+        new ArtItem {Title = "The Wranglers -- OPM", Category="Pixel Art", CoverImage = "art/wrangler.png", Description="Team image I made for the 'Data Wranglers' combining jeeps, jeans, and cats."},
+        new ArtItem { Title = "For The Birds Sanctuary Concept", Category = "Concept Art", CoverImage = "/art/sanctuary_sketch_artopoeia_palette.png", Description = "Initial concept pixel art for a bird sanctuary." },
+        new ArtItem {Title = "D&D Character Portraits", Category = "Traditional Art", CoverImage="/art/trading_cards_argon.png", ArtImage = "/art/trading_cards.png", Description = "Trading card character portraits. Oil on card stock 2.5\"x3.5\" ea."}
     };
 
     // 3. The Dialog Logic
