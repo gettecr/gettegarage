@@ -36,10 +36,27 @@
 
 <style>
     /* Reset default link styles so it looks like a button */
-     a.game-btn-wrapper {
+
+    a.game-btn-wrapper {
         text-decoration: none;
-        display: inline-block; /* Changed from block to inline-block for horizontal row */
-        margin-bottom: 0;      /* Remove bottom margin */
+        display: inline-block;
+        min-width: 180px; /* Ensure they have a consistent base size */
+    }
+
+    @@media (max-width: 600px) {
+        a.game-btn-wrapper {
+            width: 80%;       
+            max-width: 600px; 
+        }
+        
+        .game-btn-title {
+            font-size: 1rem;  /* Slightly smaller font for small screens */
+        }
+
+        .game-btn-wrapper:active .game-btn-content {
+            border-left: 4px solid #00f0ff;
+            background: rgba(0,240,255,0.1);
+        }
     }
 
     .game-btn-wrapper {

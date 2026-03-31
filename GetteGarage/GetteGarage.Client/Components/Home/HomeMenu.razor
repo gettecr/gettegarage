@@ -10,24 +10,31 @@
 <style>
     .menu-row {
         display: flex;
-        flex-direction: row;
+        flex-direction: row; /* Desktop: Side-by-side */
         gap: 2rem;
-        flex-wrap: wrap; 
         justify-content: center;
         width: 100%;
         max-width: 1200px;
         
-        /* Start Hidden */
         opacity: 0;
         transform: translateY(20px);
         transition: opacity 0.5s ease-out, transform 0.5s ease-out;
     }
 
-    /* End State */
+    /* MOBILE FIX: Switch to Column */
+    @@media (max-width: 960px) {
+        .menu-row {
+            flex-direction: column; /* Stack vertically */
+            gap: 1rem;              /* Tighter gaps for mobile */
+            padding-bottom: 80px;   /* Extra room at bottom for the Command Menu button */
+        }
+    }
+
     .menu-row.visible {
         opacity: 1;
         transform: translateY(0);
     }
+
 </style>
 
 @code {

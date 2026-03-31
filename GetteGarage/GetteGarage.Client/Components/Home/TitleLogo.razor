@@ -36,8 +36,23 @@
         align-items: center;
         user-select: none;
         padding: 1rem;
-        min-height: 400px; 
+        /* Reduce min-height for mobile so it doesn't push the menu too far down */
+        min-height: 300px; 
         justify-content: center;
+        width: 100%;
+    }
+
+    @@media (max-width: 600px) {
+        .logo-section {
+            min-height: 200px;
+            padding-top: 2rem;
+        }
+        .fade-in-slow {
+            font-size: 2.5rem !important; /* Scale down GETTE GARAGE text */
+        }
+        .sliding-logo {
+            max-height: 100px; /* Smaller logo for mobile */
+        }
     }
 
     /* TEXT ANIMATION: Start invisible, fade in */
