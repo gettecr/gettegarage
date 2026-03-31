@@ -16,6 +16,11 @@
 
         <div class="d-flex flex-column gap-3">
             
+            <MudButton Variant="Variant.Outlined" Color="Color.Tertiary" FullWidth="true" Class="contact-btn"
+                       Href="https://bsky.app/profile/mosswaffle.bsky.social">
+                <MudIcon Icon="@Icons.Material.Filled.Chat" Class="mr-3"/> 
+                BLUESKY
+            </MudButton>
             <!-- Email -->
             <MudButton Variant="Variant.Outlined" Color="Color.Secondary" FullWidth="true" Class="contact-btn"
                        Href="mailto:mc.gettegarage@gmail.com">
@@ -53,6 +58,10 @@
         border: 2px solid #f6a91f !important;
         box-shadow: 0 0 20px rgba(246, 169, 31, 0.2) !important;
         border-radius: 0px !important; /* Sharp edges */
+    }
+
+    .contact-terminal .mud-dialog-content {
+        padding-bottom: 24px !important; /* Forces extra space at the bottom */
     }
 
     .contact-btn {

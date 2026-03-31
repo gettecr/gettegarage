@@ -139,7 +139,7 @@
 
             case "ls":
                 History.Add(new TermLine { Text = "files/pages:", CssClass = "text-warning" });
-                History.Add(new TermLine { Text = "home  gallery  workshop  arcade  blog  big-larry  tidebreaker", CssClass = "" });
+                History.Add(new TermLine { Text = "home  credits  workshop  arcade  blog  community  big-larry  tidebreaker", CssClass = "" });
                 break;
                 
             case "clear":
@@ -147,10 +147,11 @@
                 break;
 
             case "go home": Nav.NavigateTo("/"); Close(); break;
-            case "go gallery": Nav.NavigateTo("/gallery"); Close(); break;
+            case "go credits": Nav.NavigateTo("/about"); Close(); break;
             case "go workshop": Nav.NavigateTo("/workshop"); Close(); break;
             case "go arcade": Nav.NavigateTo("/arcade"); Close(); break;
             case "go blog": Nav.NavigateTo("/blog"); Close(); break;
+            case "go community":Nav.NavigateTo(uri: "/community"); Close(); break;
             case "go big-larry":Nav.NavigateTo(uri: "play/big-larrys-beach-baseball"); Close(); break;
             case "go tidebreaker":Nav.NavigateTo(uri: "play/tidebreaker"); Close(); break;
 
@@ -162,6 +163,5 @@
                 break;
         }
         
-        // Optional: Scroll to bottom logic could go here
     }
 }
