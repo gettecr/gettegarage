@@ -28,7 +28,6 @@
                    AnchorOrigin="Origin.BottomCenter"
                    TransformOrigin="Origin.TopCenter"
                    RelativeWidth="DropdownWidth.Relative"
-                   Value="@_selectedMobileNav"
                    Style="width: 250px; min-width: 250px;" 
                    ValueChanged="OnMobileNavChanged"
                    Class="mobile-jump-menu"
@@ -56,7 +55,7 @@
 </div>
 
 <!-- 2. SECTION: ACTIVE TITLES -->
-<section id="active-titles" class="workshop-section">
+<section id="active-titles" class="workshop-section pt-4">
     <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-4" Style="font-family: 'Press Start 2P'">
         ACTIVE TITLES
     </MudText>
@@ -320,7 +319,7 @@
 
 @code {
 
-    private string _selectedMobileNav = "active-titles"; 
+    private string? _selectedId = null; 
 
     public class ArtItem
     {
@@ -361,9 +360,11 @@
     private async Task OnMobileNavChanged(string selectedId)
     {
         if (!string.IsNullOrEmpty(selectedId))
-        {
-            _selectedMobileNav = selectedId; // Keep the UI in sync
-            await ScrollTo(selectedId);
-        }
+    {
+        await ScrollTo(selectedId);
+        
+        _selectedId = null;
+        StateHasChanged();
+    }
     }
 }
