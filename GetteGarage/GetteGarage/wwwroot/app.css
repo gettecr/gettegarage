@@ -8,8 +8,8 @@ html, body {
     overflow-x: hidden;     /* Prevents accidental horizontal scrollbars */
 }
 .mud-main-content {
-    /* footer is 30px, so 45px gives it clearance plus a nice buffer */
-    padding-bottom: 45px !important; 
+    
+    padding-bottom: 70px !important; 
 }
 
 .mud-layout, .mud-main-content {
@@ -153,6 +153,44 @@ h1:focus {
     border-radius: 4px;
     font-family: monospace;
     color: #00ff00 !important; /* Hacker green code */
+}
+
+.mobile-jump-popover {
+    background-color: #121324 !important;
+    border: 1px solid #f6a91f !important;
+    
+    margin-top: 8px !important; 
+    
+    max-height: 400px !important;
+}
+
+.mobile-jump-popover .mud-popover-content {
+    transform-origin: top center !important;
+}
+
+.mobile-jump-popover .mud-list {
+    padding: 0 !important;
+    background-color: #121324 !important;
+}
+
+.mobile-jump-popover .mud-list-item .mud-typography {
+    font-family: 'Press Start 2P', cursive !important;
+    font-size: 0.65rem !important; /* Slightly larger for readability */
+    color: #e0e0e0 !important;
+    text-transform: uppercase;
+}
+
+.mobile-jump-popover .mud-selected .mud-typography {
+    color: #f6a91f !important;
+}
+
+.mobile-jump-popover .mud-list-item:hover {
+    background-color: rgba(246, 169, 31, 0.1) !important;
+}
+
+.mobile-jump-popover .mud-icon-root {
+    color: #f6a91f !important;
+    margin-right: 12px !important;
 }
 
 

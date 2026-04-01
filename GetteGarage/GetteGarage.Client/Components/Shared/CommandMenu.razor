@@ -28,7 +28,7 @@
 
         <!-- 3. Terminal -->
         <div class="menu-item-wrapper item-3">
-            <span class="menu-label" @onclick="OpenTerminal">CONSOLE</span>
+            <span class="menu-label" @onclick="OpenTerminal">TERMINAL</span>
             <MudFab Color="Color.Tertiary" Size="Size.Small" 
                     StartIcon="@Icons.Material.Filled.Terminal" 
                     OnClick="OpenTerminal" 
@@ -122,7 +122,7 @@
     }
 
     @@media (max-width: 600px) {
-        .command-menu-container { bottom: 30px; right: 30px; }
+        .command-menu-container { bottom: 50px; right: 30px; }
         .main-fab { transform: scale(0.9); }
         /* Hide labels on very small screens if they overlap too much */
         /* .menu-label { display: none; } */

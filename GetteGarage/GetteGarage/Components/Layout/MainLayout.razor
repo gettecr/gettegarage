@@ -3,10 +3,10 @@
 @inject NavigationManager Nav
 
 
-<MudThemeProvider Theme="GameTheme" IsDarkMode="true" />
-<MudDialogProvider />
-<MudSnackbarProvider />
-<MudPopoverProvider />
+<MudThemeProvider Theme="GameTheme" IsDarkMode="true" @rendermode="InteractiveWebAssembly" />
+<MudPopoverProvider @rendermode="InteractiveWebAssembly" />
+<MudDialogProvider @rendermode="InteractiveWebAssembly" />
+<MudSnackbarProvider @rendermode="InteractiveWebAssembly" />
 
 <GetteGarage.Client.Components.InteractiveProviders @rendermode="InteractiveWebAssembly" />
 
@@ -31,9 +31,9 @@
     <GetteGarage.Client.Components.Shared.RetroBackground />
 
     <MudAppBar Bottom="true" Fixed="true" Elevation="0" 
-           Style="background: #000; border-top: 1px solid #333; height: 30px; min-height: 30px;">
+           Style="background: #000; border-top: 1px solid #333; height: 40px; min-height: 40px;">
     
-        <MudText Typo="Typo.caption" Color="Color.Secondary" Style="font-family: 'Press Start 2P'; font-size: 0.5rem;">
+        <MudText Typo="Typo.caption" Color="Color.Secondary" Style="footer-text press-start">
             VER: 1.0.0
         </MudText>
         
@@ -42,14 +42,14 @@
         
         <div class="d-flex gap-4">
             
-            <MudText Typo="Typo.caption" Style="color:#888; font-family: monospace;">
+            <MudText Typo="Typo.caption" Class="footer-text d-none d-sm-flex" Style="color:#888;">
                 MEMORY: @(GC.GetTotalMemory(false) / 1024 / 1024)MB
             </MudText>
-            <MudText Typo="Typo.caption" Style="color:#888; font-family: monospace;">
+            <MudText Typo="Typo.caption" Class="footer-text" Style="color:#888;">
                 RENDER: WASM
             </MudText>
             
-            <MudText Typo="Typo.caption" Style="color:#f6a91f; font-family: monospace;">
+            <MudText Typo="Typo.caption" Class="footer-text" Style="color:#f6a91f;">
                 © @DateTime.Now.Year GETTE GARAGE
             </MudText>
         </div>
@@ -70,6 +70,27 @@
         0% { opacity: 1; box-shadow: 0 0 5px #00ff00; }
         50% { opacity: 0.5; box-shadow: 0 0 0px #00ff00; }
         100% { opacity: 1; box-shadow: 0 0 5px #00ff00; }
+    }
+
+    .footer-text {
+        font-family: monospace;
+        font-size: 0.7rem; /* Default Desktop size */
+        white-space: nowrap;
+    }
+
+    .press-start {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.5rem;
+    }
+
+    /* MOBILE TWEAKS */
+    @@media (max-width: 600px) {
+        .footer-text {
+            font-size: 0.6rem; /* Shrink text for mobile */
+        }
+        .press-start {
+            font-size: 0.4rem; /* Even smaller for the pixel font */
+        }
     }
 </style>
 

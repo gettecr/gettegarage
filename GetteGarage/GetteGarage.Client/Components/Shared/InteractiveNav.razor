@@ -35,24 +35,78 @@
 
 <MudDrawer @bind-Open="_drawerOpen" Elevation="1" Anchor="Anchor.Left" 
             Variant="@DrawerVariant.Temporary" 
-            Style="background: #050510; border-right: 1px solid #333; width: 250px;">
+            Fixed="true"
+            Style="background: #050510; border-right: 1px solid #333;"
+            Width="100%">
     
-    <MudDrawerHeader Class="pa-4" Style="border-bottom: 1px solid #333;">
-        <MudText Typo="Typo.h6" Color="Color.Primary" Style="font-family: 'Press Start 2P'; font-size: 0.7rem;">
+    <MudDrawerHeader Class="pa-4 d-flex justify-center align-center" Style="border-bottom: 1px solid #333;">
+        <MudText Typo="Typo.h6" Color="Color.Primary" Style="font-family: 'Press Start 2P'; font-size: 1.5rem;">
             MAIN MENU
         </MudText>
     </MudDrawerHeader>
     
     <MudNavMenu Class="pa-2">
-        <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home" Match="NavLinkMatch.All">HOME</MudNavLink>
+        <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home" Match="NavLinkMatch.All" Class="drawer-nav-link">HOME</MudNavLink>
         <MudDivider Class="my-2" />
-        <MudNavLink Href="/workshop" Icon="@Icons.Material.Filled.Work">WORKSHOP</MudNavLink>
-        <MudNavLink Href="/blog" Icon="@Icons.Material.Filled.Book">DEV_LOG</MudNavLink>
-        <MudNavLink Href="/arcade" Icon="@Icons.Material.Filled.Gamepad">ARCADE</MudNavLink>
-        <MudNavLink Href="/about" Icon="@Icons.Material.Filled.Person">CREDITS</MudNavLink>
-        <MudNavLink Href="/community" Icon="@Icons.Material.Filled.Public">COMMUNITY</MudNavLink>
+        <MudNavLink Href="/workshop" Icon="@Icons.Material.Filled.Work" Class="drawer-nav-link">WORKSHOP</MudNavLink>
+        <MudNavLink Href="/blog" Icon="@Icons.Material.Filled.Book" Class="drawer-nav-link">DEV_LOG</MudNavLink>
+        <MudNavLink Href="/arcade" Icon="@Icons.Material.Filled.Gamepad" Class="drawer-nav-link">ARCADE</MudNavLink>
+        <MudNavLink Href="/about" Icon="@Icons.Material.Filled.Person" Class="drawer-nav-link">CREDITS</MudNavLink>
+        <MudNavLink Href="/community" Icon="@Icons.Material.Filled.Public" Class="drawer-nav-link">COMMUNITY</MudNavLink>
     </MudNavMenu>
 </MudDrawer>
+
+<style>
+
+    .mud-drawer-temporary {
+        z-index: 3000 !important;
+        position: fixed !important;
+    }
+
+    /* 2. Ensure the dark overlay (that dims the page) is also on top */
+    .mud-drawer-overlay {
+        z-index: 2999 !important;
+        position: fixed !important;
+    }
+
+    .drawer-nav-link {
+        font-family: 'Press Start 2P';
+        font-size: 1.3rem;
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+
+    .drawer-nav-link .mud-nav-link {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        
+        /* Remove the default padding that pins things to the left edge */
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        height: 60px !important; 
+    }
+
+    .drawer-nav-link .mud-nav-link-icon {
+        flex: 0 0 auto !important;
+        
+        /* Set a fixed margin between the icon and the text */
+        margin-right: 16px !important;
+        
+        /* Kill the default MudBlazor left margin */
+        margin-left: 0 !important;
+        width: auto !important;
+    }
+
+    .drawer-nav-link .mud-nav-link-text {
+        flex: 0 0 auto !important;
+        
+        /* Ensure the text itself stays aligned left *relative to the icon* */
+        text-align: left !important;
+        width: auto !important;
+        margin: 0 !important;
+    }
+</style>
 
 @code {
 

@@ -4,7 +4,8 @@
 @inject IJSRuntime JS
 
 <!-- 1. THE STICKY SUB-NAV -->
-<div class="workshop-sub-nav">
+<div class="workshop-sub-nav px-4">
+    <div class="d-none d-sm-flex gap-4 w-100 justify-center">
     <MudButton OnClick="@(() => ScrollTo("active-titles"))" Color="Color.Primary" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Gamepad">
         ACTIVE
     </MudButton>
@@ -17,6 +18,41 @@
     <MudButton OnClick="@(() => ScrollTo("legacy"))" Color="Color.Tertiary" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.History">
         LEGACY
     </MudButton>
+    </div>
+
+    <div class="d-flex d-sm-none w-100 justify-center">
+        <MudSelect T="string" 
+                   Label="JUMP TO SECTION" 
+                   Variant="Variant.Outlined" 
+                   Dense="true" 
+                   AnchorOrigin="Origin.BottomCenter"
+                   TransformOrigin="Origin.TopCenter"
+                   RelativeWidth="DropdownWidth.Relative"
+                   Value="@_selectedMobileNav"
+                   Style="width: 250px; min-width: 250px;" 
+                   ValueChanged="OnMobileNavChanged"
+                   Class="mobile-jump-menu"
+                   PopoverClass="mobile-jump-popover"
+                   FullWidth="true">
+            
+            <MudSelectItem Value="@("active-titles")">
+                <div class="d-flex align-center"><MudIcon Icon="@Icons.Material.Filled.Gamepad" Size="Size.Small" Class="mr-2"/> ACTIVE</div>
+            </MudSelectItem>
+            
+            <MudSelectItem Value="@("prototypes")">
+                <div class="d-flex align-center"><MudIcon Icon="@Icons.Material.Filled.Science" Size="Size.Small" Class="mr-2"/> PROTOTYPES</div>
+            </MudSelectItem>
+            
+            <MudSelectItem Value="@("art-assets")">
+                <div class="d-flex align-center"><MudIcon Icon="@Icons.Material.Filled.Brush" Size="Size.Small" Class="mr-2"/> ART</div>
+            </MudSelectItem>
+            
+            <MudSelectItem Value="@("legacy")">
+                <div class="d-flex align-center"><MudIcon Icon="@Icons.Material.Filled.History" Size="Size.Small" Class="mr-2"/> LEGACY</div>
+            </MudSelectItem>
+
+        </MudSelect>
+    </div>
 </div>
 
 <!-- 2. SECTION: ACTIVE TITLES -->
@@ -227,13 +263,11 @@
         background: rgba(18, 19, 36, 0.95); 
         backdrop-filter: blur(8px);
         
-        padding: 10px 0;
-        margin-bottom: 2rem;
+        padding: 12px 0;
         border-bottom: 1px solid #333;
         
         display: flex;
-        gap: 1rem;
-        overflow-x: auto; 
+        align-items: center;
     }
 
     /* Invisible bumper to stop the header from covering section titles when you jump to them */
@@ -250,10 +284,44 @@
         box-shadow: 0 5px 15px rgba(246, 169, 31, 0.2);
         border-color: #f6a91f !important;
     }
+
+    .mobile-jump-menu .mud-input-label {
+        font-family: 'Press Start 2P'!important;
+        font-size: 0.8rem !important; 
+        color: #f6a91f !important;
+    }
+
+    .mobile-jump-menu .mud-input-slot {
+        font-family: 'Press Start 2P' !important;
+        font-size: 0.7rem !important;
+        padding-top: 16px !important;
+    }
+
+    .mobile-jump-menu .mud-input-outlined-border {
+        border-color: rgba(246, 169, 31, 0.5) !important;
+    }
+
+
+    .mobile-jump-menu fieldset legend {
+    /* Increase the padding around the text inside the border gap */
+    padding-left: 8px !important;
+    padding-right: 60px !important; /* Increase the right side specifically */
+    
+    /* Ensure the legend is wide enough for the custom font */
+    width: auto !important; 
+}
+
+
+    
+
+    
+
 </style>
 
 @code {
-    // 1. The Data Model
+
+    private string _selectedMobileNav = "active-titles"; 
+
     public class ArtItem
     {
         public string Title { get; set; } = "";
@@ -272,7 +340,6 @@
         new ArtItem { Title = "For The Birds - Henry Animation", Category = "Pixel Art",CoverImage = "/art/prototype_henry_share.png", ArtImage = "/art/prototype_henry_share.gif", Description = "Run animation for 'Henry'- protagonist of For The Birds." },
         new ArtItem {Title = "Rexi pixel art -- OPM", Category = "Pixel Art", CoverImage = "art/opm_pixel_art.png", Description="Various versions of Rexi, the chatbot mascot I made for OPM."},
         new ArtItem {Title = "The Wranglers -- OPM", Category="Pixel Art", CoverImage = "art/wrangler.png", Description="Team image I made for the 'Data Wranglers' combining jeeps, jeans, and cats."},
-        new ArtItem { Title = "For The Birds Sanctuary Concept", Category = "Concept Art", CoverImage = "/art/sanctuary_sketch_artopoeia_palette.png", Description = "Initial concept pixel art for a bird sanctuary." },
         new ArtItem {Title = "D&D Character Portraits", Category = "Traditional Art", CoverImage="/art/trading_cards_argon.png", ArtImage = "/art/trading_cards.png", Description = "Trading card character portraits. Oil on card stock 2.5\"x3.5\" ea."}
     };
 
@@ -289,5 +356,14 @@
     private async Task ScrollTo(string id)
     {
         await JS.InvokeVoidAsync("scrollToElement", id);
+    }
+
+    private async Task OnMobileNavChanged(string selectedId)
+    {
+        if (!string.IsNullOrEmpty(selectedId))
+        {
+            _selectedMobileNav = selectedId; // Keep the UI in sync
+            await ScrollTo(selectedId);
+        }
     }
 }
