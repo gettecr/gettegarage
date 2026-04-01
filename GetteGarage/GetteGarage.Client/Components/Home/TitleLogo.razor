@@ -1,9 +1,7 @@
 @using MudBlazor
-@using GetteGarage.Client.Services
-@inject AchievementService Achievements
 
 
-<div class="logo-section cursor-pointer" @onclick="HandleLogoClick">
+<div class="logo-section">
     
     <!--Top Text (Fades In) -->
     <MudText Typo="Typo.h1" Color="Color.Primary" Align="Align.Center" Class="title-text fade-in-slow">
@@ -21,10 +19,6 @@
         GARAGE
     </MudText>
     
-    <!-- 4. Press Start (Blinks, delayed) -->
-    @* <MudText Typo="Typo.h5" Class="mt-6 press-start-blink" Align="Align.Center" Color="Color.Secondary">
-        PRESS START 
-    </MudText> *@
 
 </div>
 
@@ -58,7 +52,7 @@
     /* TEXT ANIMATION: Start invisible, fade in */
     .fade-in-slow {
         opacity: 0;
-        animation: textFadeIn 2s ease-out forwards;
+        animation: textFadeIn .5s ease-out forwards;
         animation-delay: 0.5s; /* Wait for logo to start moving */
         line-height: 1.2;
         font-size: 4rem; /* Adjust based on preference */
@@ -74,12 +68,6 @@
         opacity: 0;
         
         animation: logoSlideIn 1.2s cubic-bezier(0.17, 0.67, 0.23, 0.96) forwards;
-    }
-
-    .press-start-blink {
-        opacity: 0; 
-        animation: blink-hard 1s infinite;
-        animation-delay: 2.5s;
     }
 
     /* --- KEYFRAMES --- */
@@ -120,19 +108,3 @@
         .sliding-logo { max-height: 100px; }
     }
 </style>
-
-@code {
-    private int _clickCount = 0;
-
-    private async Task HandleLogoClick()
-    {
-        _clickCount++;
-        if (_clickCount == 5)
-        {
-            await Achievements.Unlock("garage_door", "Garage Opener", "You knocked on the door 5 times.");
-            
-            // Optional: Reset count so they don't spam it
-            _clickCount = 0; 
-        }
-    }
-}
