@@ -16,7 +16,7 @@
     else
     {
         <MudPaper Elevation="0" Class="pa-4">
-            <MudText Typo="Typo.h3" GutterBottom="true">@CurrentPost.Title</MudText>
+            <MudText Typo="Typo.h3" GutterBottom="true" Class="responsive-blog-title">@CurrentPost.Title</MudText>
             <MudText Typo="Typo.subtitle2" Class="mb-6" Color="Color.Secondary">
                 Published on @CurrentPost.PubDate.ToLongDateString()
             </MudText>
@@ -35,6 +35,34 @@
         </MudPaper>
     }
 </MudContainer>
+
+<style>
+    .responsive-blog-title {
+        /* Standard desktop font family from your theme */
+        font-family: 'Press Start 2P', cursive;
+        line-height: 1.4;
+        
+        /* Force words to wrap so they don't break the layout */
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* MOBILE TWEAK (Phones) */
+    @@media (max-width: 600px) {
+        .responsive-blog-title {
+            /* Drop from default ~3rem down to 1.2rem */
+            font-size: 1.2rem !important; 
+            margin-top: 1rem;
+        }
+    }
+
+    /* TABLET TWEAK */
+    @@media (min-width: 601px) and (max-width: 960px) {
+        .responsive-blog-title {
+            font-size: 1.8rem !important;
+        }
+    }
+</style>
 
 @code {
     [Parameter] public string Slug { get; set; }

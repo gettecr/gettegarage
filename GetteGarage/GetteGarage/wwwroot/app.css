@@ -71,6 +71,8 @@ h1:focus {
 .blog-content {
     /* Force text to be your Light Gray instead of Substack's Dark Gray */
     color: #e0e0e0 !important; 
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
     
     font-family: 'Rajdhani', sans-serif;
     font-size: 1.15rem;
@@ -83,6 +85,36 @@ h1:focus {
 .blog-content span {
     color: #e0e0e0 !important;
     margin-bottom: 1.5rem;
+}
+
+.blog-content ul, 
+.blog-content ol {
+    margin-left: 1.5rem !important; /* Pushes the whole list away from the left edge */
+    margin-bottom: 1.5rem;
+    padding-left: 1rem;
+}
+
+.blog-content li {
+    margin-bottom: 0.75rem; /* Space between bullet points */
+    padding-left: 0.5rem;   /* Space between bullet and the text */
+    line-height: 1.6;
+    color: #e0e0e0;
+}
+
+.blog-content ul li {
+    list-style-type: square; /* Or use 'disc' for standard circles */
+    color: #f6a91f; /* Make the actual bullet orange to match theme */
+}
+
+@media (max-width: 600px) {
+    .blog-content {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    .blog-content ul, 
+    .blog-content ol {
+        margin-left: 1rem !important;
+    }
 }
 
 /* Headings (Centered & Retro Font) */
