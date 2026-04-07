@@ -2,6 +2,7 @@
 @rendermode InteractiveWebAssembly
 @inject IDialogService DialogService
 @inject IJSRuntime JS
+@using IdleGame
 
 <!-- 1. THE STICKY SUB-NAV -->
 <div class="workshop-sub-nav px-4">
@@ -87,11 +88,23 @@
                 PlayLink="/play/tidebreaker" />
         </MudItem>
 
+                <!-- Fishing -->
+        <MudItem xs="12" md="4">
+            <StudioGameCard 
+                Title="FishFight" 
+                Version="v1.0" Status="BUILT IN" StatusColor="Color.Info"
+                Description="A Cast lines and catch fish type game."
+                TechStack="Blazor WASM"
+                ButtonText="GO FISH!"
+                OpenGames=true
+                 /> 
+        </MudItem>
+
         <!-- Gette Garage (The Site) -->
         <MudItem xs="12" md="4">
             <StudioGameCard 
                 Title="Gette Garage" 
-                Version="v2.0" Status="SYSTEM" StatusColor="Color.Warning"
+                Version="v1.0" Status="SYSTEM" StatusColor="Color.Warning"
                 Description="This website. Full-stack .NET web app."
                 TechStack=".NET 8, Azure"
                 StaticImage="/art/gettegarage.png"
@@ -155,6 +168,8 @@
                 Description="Grow your bird sanctuary, attract the birds"
                 TechStack="Godot 4"
                 ButtonText="COMING SOON"
+                StaticImage="/art/forthebirds.png"
+                AnimatedGif="/art/forthebirds.gif"
                 DisableButton=true
                 PlayLink="#" />
         </MudItem>
@@ -166,21 +181,12 @@
                 Description="Raccoon jump good in a DK '94 style platformer"
                 TechStack="Godot 4"
                 ButtonText="CONCEPT"
+                StaticImage="/art/trashbandit.png"
+                AnimatedGif="/art/trashbandit.gif"
                 DisableButton=true
                 PlayLink="#" />
         </MudItem>
 
-        <!-- Fishing -->
-        <MudItem xs="12" md="4">
-            <StudioGameCard 
-                Title="FishFight" 
-                Version="v1.0" Status="COMING SOON" StatusColor="Color.Info"
-                Description="A Cast lines and catch fish type game."
-                TechStack="Blazor WASM"
-                ButtonText="COMING SOON"
-                DisableButton=true
-                PlayLink="#" /> 
-        </MudItem>
 
         <!-- Dev Simulator -->
         <MudItem xs="12" md="4">

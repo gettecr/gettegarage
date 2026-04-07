@@ -1,5 +1,8 @@
 @using MudBlazor
 
+@inject IDialogService DialogService
+@using IdleGame
+
 <MudPaper Class="studio-card">
     <div class="d-flex flex-column" style="height: 100%;">
         
@@ -52,6 +55,17 @@
             {
                 <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="@PlayLink" Size="Size.Small" Disabled=@DisableButton>
                     @ButtonText
+                </MudButton>
+            }
+            else if(@OpenGames)
+            {
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="OpenIdleGames" Size="Size.Small" Disabled=@DisableButton>
+                    @ButtonText
+                </MudButton>
+            }
+            else {
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="#" Size="Size.Small" Disabled=true>
+                    DISABLED
                 </MudButton>
             }
         </div>
@@ -119,4 +133,19 @@
 
     [Parameter] public bool DisableButton {get; set;} = false;
     [Parameter] public string ButtonText {get; set;}
+
+    [Parameter] public bool OpenGames {get; set;} = false;
+
+        private void OpenIdleGames() {
+
+        var options = new DialogOptions 
+        { 
+            CloseButton = false, 
+            MaxWidth = MaxWidth.Small, 
+            FullWidth = true,
+            BackdropClick = true
+        };
+        
+        DialogService.ShowAsync<GlobalIdleGame>("", options);
+    }
 }

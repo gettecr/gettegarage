@@ -1,5 +1,7 @@
 @inject NavigationManager Nav
 @inject IJSRuntime JS
+@inject IDialogService DialogService
+@using IdleGame
 
 <div class="cartridge-wrapper">
     <!-- The physical plastic shell -->
@@ -45,8 +47,7 @@
     [Parameter] public string Version { get; set; } = "v1.0";
     [Parameter] public string ImageUrl { get; set; } = "";
     [Parameter] public string PlayLink { get; set; } = "#";
-    
-    // Allows us to have grey, gold, or red cartridges
+    [Parameter] public bool OpenGames {get; set; } = false;
     [Parameter] public string PlasticColorClass { get; set; } = "plastic-grey";
 
     private async Task PlayHover()
@@ -61,7 +62,26 @@
         
         // Wait just a split second so the CSS 'push down' animation finishes before navigating
         await Task.Delay(150); 
-        Nav.NavigateTo(PlayLink);
+        if (PlayLink !="#"){
+             Nav.NavigateTo(PlayLink);
+        }
+        else if (OpenGames){
+            OpenIdleGames();
+        }
+       
+    }
+
+    private void OpenIdleGames() {
+
+        var options = new DialogOptions 
+        { 
+            CloseButton = false, 
+            MaxWidth = MaxWidth.Small, 
+            FullWidth = true,
+            BackdropClick = true
+        };
+        
+        DialogService.ShowAsync<GlobalIdleGame>("", options);
     }
 }
 
