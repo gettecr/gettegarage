@@ -28,18 +28,22 @@ public class RodDef
 
 public class FishDef 
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
+    public string Emoji { get; set; } = "🐟";
     public double MinLength { get; set; }
     public double MaxLength { get; set; }
     public string SpriteUrl { get; set; } = "";
     public double Rarity {get; set;} = 1.0;
+    public double BaseValue { get; set; }
 }
 
 public class CaughtFish 
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
+    public string Emoji { get; set; } = "🐟";
     public double Length { get; set; }
-    public string SpriteUrl { get; set; }
+    public string SpriteUrl { get; set; } = "";
+    public double Value { get; set; }
     public bool IsNewRecord { get; set; }
 }
 
@@ -53,6 +57,7 @@ public class PlayerFishRecord
 public class FishingSaveData
 {
     public int TotalFish { get; set; }
+    public double TotalMoney { get; set; }
     public Dictionary<string, PlayerFishRecord> PersonalBests { get; set; } = new();
     
     public List<string> UnlockedRodIds { get; set; } = new();

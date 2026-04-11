@@ -1,17 +1,17 @@
-@page "/fishing"
+@implements IDisposable
 @using GetteGarage.Client.Models
 @using GetteGarage.Client.Services
-@using System.Threading.Tasks
-@using System.Runtime.InteropServices
+@using System.Threading
 @using System.Text.Json
 @inject FishingGameEngine Engine
 @inject GetteGarage.Client.Services.AchievementService Achievements
 @inject IJSRuntime JS
-@implements IDisposable
+@inject HttpClient Http
 
-<MudCard Elevation="0" Class="pa-0 d-flex flex-column" Style="height: 100%; background: #050510; border: 2px solid #2d2e45;">
+<MudCard Elevation="0" Class="pa-0 d-flex flex-column flex-grow-1" Style="height: 100%; background: #050510; border: 2px solid #2d2e45;">
     
-    <div tabindex="0" @ref="gameContainer" @onkeydown="OnKeyDown" style="outline:none; flex: 0 0 280px;">
+    <!-- 1. VIEWPORT -->
+    <div tabindex="0" @ref="gameContainer" @onkeydown="OnKeyDown" style="outline:none; flex: 0 0 180px; position: relative;">
         <GameViewport Theme="@Engine.CurrentTheme" 
                       State="@_gameState" 
                       ActiveRod="@Engine.ActiveRod"
@@ -27,108 +27,170 @@
                              ActiveRod="Engine.ActiveRod" 
                              TimeLeft="_minigameTimeLeft" 
                              TotalTime="_minigameTimeTotal"
+                             OnTargetKeyChanged="(key) => { _currentQteTarget = key; InvokeAsync(StateHasChanged); }"
                              OnComplete="HandleMinigameOutcome" />
             }
         </GameViewport>
+
+        <!-- NEW: Enhanced Splash Screen Overlay showing Emoji & Value -->
+        @if (_showSplash && _lastCatch != null)
+        {
+            <div class="custom-splash-overlay">
+                <div class="splash-emoji">@_lastCatch.Emoji</div>
+                <div class="splash-text">
+                    <span class="d-block" style="color: #00ff00;">+$@_lastCatch.Value.ToString("N0")</span>
+                    <span class="d-block" style="font-size: 0.7rem;">@_lastCatch.Length.ToString("F1")cm @_lastCatch.Name</span>
+                </div>
+            </div>
+        }
     </div>
 
-    <div class="flex-grow-1 height: 0">
-        <MudTabs Elevation="0" Rounded="true" Class="fishing-tabs" PanelClass="pa-3" ActivePanelIndex="_activeTab"
-         ActivePanelIndexChanged="OnTabChanged">
-            
+    <!-- 2. CUSTOM TAB NAVIGATION (Replaces MudTabs) -->
+    <div class="game-nav-row">
+        <button class="game-nav-btn @(_activeTab == 0 ? "active" : "")" @onclick="() => SwitchTab(0)">PLAY</button>
+        <button class="game-nav-btn @(_activeTab == 1 ? "active" : "")" @onclick="() => SwitchTab(1)">GEAR</button>
+        <button class="game-nav-btn @(_activeTab == 2 ? "active" : "")" @onclick="() => SwitchTab(2)">RECORDS</button>
+    </div>
 
-            <MudTabPanel Text="PLAY" Icon="@Icons.Material.Filled.Gamepad">
-                <div class="gear-list">
-                    <div class="d-flex justify-space-between align-center mb-4 mt-2">
-                        <MudText Typo="Typo.body2" Class="text-warning" Style="font-family:'Press Start 2P'; font-size:0.7rem;">
-                            FISH: @Engine.TotalFishCaught
+    <!-- 3. TAB CONTENT AREA -->
+    <div class="flex-grow-1 d-flex flex-column pa-3" style="min-height: 0;">
+        
+        <!-- TAB 0: PLAY -->
+        @if (_activeTab == 0)
+        {
+            <div class="d-flex flex-column h-100">
+                <!-- Economy Header -->
+                <div class="d-flex justify-space-between align-center mb-4">
+                    <div>
+                        <MudText Typo="Typo.body2" Class="text-success" Style="font-family:'Press Start 2P'; font-size:0.8rem;">
+                            $@Engine.TotalMoney.ToString("N0")
                         </MudText>
-                        <MudChip T="string" Color="Color.Info" Size="Size.Small">ROD: @Engine.ActiveRod.Name</MudChip>
+                        <MudText Typo="Typo.caption" Style="color: #666; font-size: 0.6rem;">CAUGHT: @Engine.TotalFishCaught</MudText>
                     </div>
+                    <MudChip T="string" Color="Color.Info" Size="Size.Small" Variant="Variant.Outlined">@Engine.ActiveRod.Name</MudChip>
+                </div>
 
-                    <MudButton Variant="Variant.Filled" Color="GetButtonColor()" FullWidth="true" Class="py-3"
-                               OnClick="HandleMainAction" 
-                               onkeypress="space"
-                               Disabled="@(_gameState == GameState.Minigame && Engine.ActiveRod.Type != RodType.Basic)">
+                @if (_gameState == GameState.Minigame)
+                {
+                    @if (Engine.ActiveRod.Type == RodType.Qte)
+                    {
+                        <!-- NEW: The Dynamic QTE Keypad -->
+                        <!-- We need to pass the current required key from your MinigameHUD -->
+                        <QteKeypad TargetKey="@_currentQteTarget" 
+                                   ButtonCount="@GetQteButtonCount()" 
+                                   OnKeyTapped="HandleVirtualKey" />
+                    }
+                    else if (Engine.ActiveRod.Type == RodType.Rhythm)
+                    {
+                        <!-- The D-Pad we built earlier -->
+                        <VirtualGamepad OnKeyPress="HandleVirtualKey" />
+                    }
+                    else if (Engine.ActiveRod.Type == RodType.Ascii)
+                    {
+                        <!-- Hacker mode requires physical/mobile keyboard -->
+                        <MudText Align="Align.Center" Color="Color.Success" Class="mb-4" Style="font-family: monospace;">TYPE THE CODE TO HACK THE FISH</MudText>
+                    }
+                    else
+                    {
+                        <!-- Basic Rod -->
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" FullWidth="true" Class="py-3 mb-4" Style="font-family: 'Press Start 2P', cursive;" OnClick="() => HandleMinigameOutcome(true)">
+                            REEL IN!
+                        </MudButton>
+                    }
+                }
+                else
+                {
+                    <!-- Standard Casting Button -->
+                    <MudButton Variant="Variant.Filled" Color="@GetButtonColor()" FullWidth="true" Class="py-3 mb-4"
+                               Style="font-family: 'Press Start 2P', cursive;"
+                               OnClick="HandleMainAction">
                         @GetButtonText()
                     </MudButton>
+                }
 
-                    <div class="flex-grow-1 custom-scroll py-3" style="min-height:0;">
-                        @if (Engine.PersonalBests.Any())
+                <!-- Personal Bests Log -->
+                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-1 d-block">PERSONAL LOG</MudText>
+                <div class="flex-grow-1 custom-scroll" style="overflow-y: auto; border: 1px solid #222; background: #111;">
+                    @if (Engine.PersonalBests.Any())
+                    {
+                        <table style="width: 100%; text-align: left; font-size: 0.8rem;">
+                            <thead style="background: #222; color: #f6a91f;">
+                                <tr><th class="pa-2">Fish</th><th class="pa-2">Qty</th><th class="pa-2 text-right">Best (cm)</th></tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var record in Engine.PersonalBests.Values.OrderBy(r => r.Name))
+                            {
+                                <tr style="border-bottom: 1px solid #222;">
+                                    <td class="pa-2" style="font-weight: bold;">@record.Name</td>
+                                    <td class="pa-2">@record.Count</td>
+                                    <td class="pa-2 text-right text-success">@record.MaxLength.ToString("F1")</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="pa-4 text-center" style="color: #666;">Catch a fish to start your log!</div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- TAB 1: GEAR -->
+        @if (_activeTab == 1)
+        {
+            <div class="h-100 custom-scroll" style="overflow-y: auto; padding-right: 5px;">
+                @foreach (var rod in GetVisibleRods())
+                {
+                    <div class="d-flex justify-space-between align-center mb-2 pa-2 rounded" 
+     style="@($"background: rgba(255,255,255,0.05); border-left: {(Engine.ActiveRod.Id == rod.Id ? "3px solid #00ff00" : "3px solid transparent")};")">
+                        <div>
+                            <MudText Typo="Typo.body2" 
+         Style="@($"font-weight:bold; color: {(Engine.ActiveRod.Id == rod.Id ? "#00ff00" : "#fff")};")">@rod.Name</MudText>
+                            <MudText Typo="Typo.caption" Style="color:#aaa;">@rod.Description</MudText>
+                        </div>
+                        
+                        @if (rod.IsUnlocked)
                         {
-                            <MudSimpleTable Dense="true" Hover="true" Class="rounded">
-                                <thead>
-                                    <tr><th>Fish</th><th>Caught</th><th>Best</th></tr>
-                                </thead>
-                                <tbody>
-                                @foreach (var record in Engine.PersonalBests.Values.OrderBy(r => r.Name))
-                                {
-                                    <tr>
-                                        <td>@record.Name</td>
-                                        <td>@record.Count</td>
-                                        <td>@record.MaxLength.ToString("F1") cm</td>
-                                    </tr>
-                                }
-                                </tbody>
-                            </MudSimpleTable>
+                            <MudButton Variant="@(Engine.ActiveRod.Id == rod.Id ? Variant.Filled : Variant.Text)" 
+                                       Size="Size.Small" Color="Color.Success" OnClick="() => Engine.EquipRod(rod)"
+                                       Disabled="@(Engine.ActiveRod.Id == rod.Id)">
+                                @(Engine.ActiveRod.Id == rod.Id ? "EQUIPPED" : "EQUIP")
+                            </MudButton>
                         }
                         else
                         {
-                            <MudText Align="Align.Center" Color="Color.Inherit" Class="mt-8">Catch a fish to start your log!</MudText>
+                            <!-- Button relies on TotalMoney now ($) -->
+                            <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Warning"
+                                       Disabled="@(Engine.TotalMoney < rod.UnlockCost)" OnClick="() => Engine.UnlockRod(rod)">
+                                $@rod.UnlockCost.ToString("N0")
+                            </MudButton>
                         }
                     </div>
+                }
+            </div>
+        }
 
-                    
+        <!-- TAB 2: RECORDS -->
+        @if (_activeTab == 2)
+        {
+            <div class="d-flex flex-column h-100">
+                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2 d-block">GLOBAL HALL OF FAME</MudText>
+                
+                <div class="scroll-container mb-4">
+                    <MudToggleGroup T="string" Value="@_selectedSpecies" ValueChanged="OnSpeciesChanged" 
+                                    SelectionMode="SelectionMode.SingleSelection" 
+                                    Color="Color.Primary" CheckMark="false" FixedContent="false"
+                                    Class="retro-toggle-group">
+                        @foreach (var species in Engine.GetAllSpeciesNames())
+                        {
+                            <MudToggleItem Value="@species" Text="@species" />
+                        }
+                    </MudToggleGroup>
                 </div>
-            </MudTabPanel>
 
-            <!-- GEAR TAB -->
-            <MudTabPanel Text="GEAR" Icon="@Icons.Material.Filled.Phishing">
-                <!-- Inner scroll area -->
-                <div class=" gear-list">
-                     @foreach (var rod in GetVisibleRods())
-                    {
-                        <div class="d-flex justify-space-between align-center mb-2 pa-2 rounded" style="background: rgba(255,255,255,0.05);">
-                            <div>
-                                <MudText Typo="Typo.body2" Style="font-weight:bold;">@rod.Name</MudText>
-                                <MudText Typo="Typo.caption" Style="color:#aaa;">@rod.Description</MudText>
-                            </div>
-                            @if (rod.IsUnlocked)
-                            {
-                                <MudButton Variant="@(Engine.ActiveRod.Id == rod.Id ? Variant.Filled : Variant.Outlined)" 
-                                           Size="Size.Small" Color="Color.Success" OnClick="() => Engine.EquipRod(rod)">
-                                    @(Engine.ActiveRod.Id == rod.Id ? "EQUIPPED" : "EQUIP")
-                                </MudButton>
-                            }
-                            else
-                            {
-                                <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Warning"
-                                           Disabled="@(Engine.TotalFishCaught < rod.UnlockCost)" OnClick="() => Engine.UnlockRod(rod)">
-                                    UNLOCK (@rod.UnlockCost)
-                                </MudButton>
-                            }
-                        </div>
-                    }
-                </div>
-            </MudTabPanel>
-
-            <MudTabPanel Text="RECORDS">
-                <div class="pa-3 custom-scroll" style="height: 250px; overflow-y: auto;">
-                    <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2 d-block">SELECT SPECIES</MudText>
-                    
-                    <div class="scroll-container mb-4">
-                        <!-- 2. Set FixedContent="false" to allow items to be their own size -->
-                        <MudToggleGroup T="string" Value="@_selectedSpecies" ValueChanged="OnSpeciesChanged" 
-                                        SelectionMode="SelectionMode.SingleSelection" 
-                                        Color="Color.Primary" CheckMark="false" FixedContent="false"
-                                        Class="retro-toggle-group">
-                            @foreach (var species in Engine.GetAllSpeciesNames())
-                            {
-                                <MudToggleItem Value="@species" Text="@species" />
-                            }
-                        </MudToggleGroup>
-                    </div>
-
+                <div class="flex-grow-1 custom-scroll" style="overflow-y: auto;">
                     @if (_isLoadingLeaderboard)
                     {
                         <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
@@ -141,26 +203,18 @@
                     {
                         @for (int i = 0; i < _leaderboard.Count; i++)
                         {
-                            // Create a local variable for the current record
                             var record = _leaderboard[i];
-                            
-                            // Calculate rank based on index (0-based index + 1)
                             int displayRank = i + 1;
 
                             <div class="d-flex justify-space-between align-center pa-2 mb-1" style="background: #111; border-bottom: 1px solid #333;">
                                 <div class="d-flex align-center">
-                                    <!-- Use displayRank here -->
-                                    <MudText Typo="Typo.caption" 
-                                            Color="@(displayRank == 1 ? Color.Warning : Color.Default)" 
-                                            Style="font-family: 'Press Start 2P'; width: 25px;">
+                                    <MudText Typo="Typo.caption" Color="@(displayRank == 1 ? Color.Warning : Color.Default)" Style="font-family: 'Press Start 2P'; width: 25px;">
                                         #@displayRank
                                     </MudText>
-                                    
                                     <MudText Typo="Typo.body2" Class="ml-2" Style="font-family: monospace; font-weight: bold;">
                                         @record.PlayerName
                                     </MudText>
                                 </div>
-                                
                                 <MudText Typo="Typo.caption" Color="Color.Success">
                                     @record.Length.ToString("F2") cm
                                 </MudText>
@@ -168,32 +222,34 @@
                         }
                     }
                 </div>
-            </MudTabPanel>
-        </MudTabs>
+            </div>
+        }
     </div>
 
+    <!-- WORLD RECORD DIALOG -->
     @if (_showRecordDialog && _lastCatch != null)
     {
         <div class="record-overlay">
             <MudPaper Class="pa-4 record-dialog" Elevation="25">
                 <MudText Typo="Typo.h5" Color="Color.Warning" Style="font-family: 'Press Start 2P'; animation: pulse 1s infinite;">
-                    NEW WORLD RECORD!
+                    WORLD RECORD!
                 </MudText>
                 
-                <MudText Typo="Typo.body1" Align="Align.Center">
-                    You caught a <b>@_lastCatch.Length.ToString(format: "N2") cm</b> @_lastCatch.Name!
+                <div style="font-size: 3rem; margin: 10px 0;">@_lastCatch.Emoji</div>
+                
+                <MudText Typo="Typo.body1" Align="Align.Center" Class="mb-2">
+                    You caught a <b>@_lastCatch.Length.ToString("N2") cm</b> @_lastCatch.Name!
                 </MudText>
                 <MudText Typo="Typo.caption" Align="Align.Center" Class="d-block mb-4" Style="color: #888;">
-                    Enter your name in the Hall of Fame.
+                    Enter your initials (3 letters).
                 </MudText>
 
-                <MudTextField @bind-Value="_playerNameInput" Label="Initials (3 Letters)" MaxLength="3" 
-                              Variant="Variant.Outlined" Class="mb-4" Style="font-family: monospace; text-transform: uppercase;" />
+                <MudTextField @bind-Value="_playerNameInput" MaxLength="3" Variant="Variant.Outlined" Class="mb-4 text-center" Style="font-family: 'Press Start 2P'; text-transform: uppercase;" />
 
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="SubmitRecord">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="SubmitRecord" Class="mb-2" Style="font-family: 'Press Start 2P'; font-size: 0.6rem;">
                     SUBMIT
                 </MudButton>
-                <MudButton Variant="Variant.Text" Color="Color.Default" FullWidth="true" Class="mt-2" OnClick="() => _showRecordDialog = false">
+                <MudButton Variant="Variant.Text" Color="Color.Default" FullWidth="true" OnClick="() => _showRecordDialog = false">
                     SKIP
                 </MudButton>
             </MudPaper>
@@ -202,72 +258,60 @@
 </MudCard>
 
 <style>
-    /* Custom Scrollbar */
+    /* CUSTOM NAVIGATION ROW */
+    .game-nav-row {
+        display: flex;
+        background: #111;
+        border-bottom: 2px solid #222;
+        border-top: 2px solid #222;
+    }
+    
+    .game-nav-btn {
+        flex: 1;
+        padding: 12px 0;
+        background: transparent;
+        border: none;
+        color: #888;
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.6rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-bottom: 3px solid transparent;
+    }
+    
+    .game-nav-btn:hover { background: #1a1a2e; color: #fff; }
+    
+    .game-nav-btn.active {
+        color: #f6a91f;
+        background: rgba(246, 169, 31, 0.1);
+        border-bottom-color: #f6a91f;
+    }
+
+    /* SPLASH OVERLAY */
+    .custom-splash-overlay {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6); z-index: 50;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        animation: floatUpFade 1.5s forwards;
+    }
+    .splash-emoji { font-size: 4rem; filter: drop-shadow(0 0 10px rgba(255,255,255,0.8)); }
+    .splash-text { text-align: center; font-family: 'Press Start 2P'; font-size: 1rem; text-shadow: 2px 2px 0 #000; }
+
+    /* EXISTING STYLES */
     .custom-scroll::-webkit-scrollbar { width: 6px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
     
-    /* Flexbox overrides for MudTabs to fill height */
-    .fishing-tabs { 
-        display: flex; 
-        flex-direction: column; 
-        height: 100%; 
-    }
-    
-    .fishing-tabs .mud-tabs-panels { 
-        flex-grow: 1; 
-        height: 0; /* Let the container grow, but don't give it a fixed height */
-    }
+    .record-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; }
+    .record-dialog { background: #111; border: 2px solid #f6a91f; text-align: center; max-width: 90%; }
 
-    .fishing-tabs .mud-tab-panel {
-        height: 100%;
-    }
-    
-    .gear-list { 
-        height: 100%; 
-        overflow-y: auto; 
-        padding-right: 5px; 
-    }
-
-    .record-overlay {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.8); z-index: 100;
-        display: flex; align-items: center; justify-content: center;
-    }
-    .record-dialog {
-        background: #111; border: 2px solid #f6a91f; text-align: center;
-    }
-
-    .retro-toggle-group {
-        display: flex !important;
-        flex-wrap: nowrap !important; /* Force one line */
-        width: max-content; /* Allow it to grow as wide as the words */
-        background: #111 !important;
-        border: 1px solid #333 !important;
-    }
-
-    /* Force each button to keep its shape */
-    .retro-toggle-group .mud-toggle-item {
-        flex-shrink: 0 !important;
-        padding: 0 12px !important;
-    }
-
-    /* The Scrollbar styling */
-    .scroll-container {
-        overflow-x: auto;
-        width: 100%;
-        scrollbar-width: thin;
-        scrollbar-color: #f6a91f #111;
-    }
-
-    .scroll-container::-webkit-scrollbar {
-        height: 4px;
-    }
-    .scroll-container::-webkit-scrollbar-thumb {
-        background: #f6a91f;
-        border-radius: 2px;
-    }
+    .retro-toggle-group { display: flex !important; flex-wrap: nowrap !important; width: max-content; background: #111 !important; border: 1px solid #333 !important; }
+    .retro-toggle-group .mud-toggle-item { flex-shrink: 0 !important; padding: 0 12px !important; }
+    .scroll-container { overflow-x: auto; width: 100%; scrollbar-width: thin; scrollbar-color: #f6a91f #111; }
+    .scroll-container::-webkit-scrollbar { height: 4px; }
+    .scroll-container::-webkit-scrollbar-thumb { background: #f6a91f; border-radius: 2px; }
 
     @@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    @@keyframes floatUpFade { 0% { opacity: 0; transform: translateY(20px); } 20% { opacity: 1; } 80% { opacity: 1; transform: translateY(-20px); } 100% { opacity: 0; transform: translateY(-30px); } }
 </style>
 
 @code {
@@ -275,60 +319,57 @@
     private ElementReference gameContainer;
     private MinigameHUD minigameHud;
 
-
-    // View State
     private GameState _gameState = GameState.Idle;
     private bool _isCasting = false;
     private int _bobberX = 50;
     private bool _showSplash = false;
     private CaughtFish _lastCatch;
 
-    // Timers
     private Timer? _actionTimer;
     private System.Timers.Timer _minigameTimer;
     private double _minigameTimeTotal = 2000;
     private double _minigameTimeLeft = 2000;
+    private CancellationTokenSource? _biteCts;
 
     private bool _showRecordDialog = false;
     private string _playerNameInput = "";
-    private int _activeTab = 0;
-    private string _selectedSpecies = "Minnow"; // Default starting fish
+    private int _activeTab = 0; // 0 = Play, 1 = Gear, 2 = Records
+    private string _selectedSpecies = "Minnow";
     private bool _isLoadingLeaderboard = false;
+    private string _currentQteTarget = "A";
     private List<FishingRecord> _leaderboard = new();
-    private CancellationTokenSource? _biteCts;
 
-    [Inject] private HttpClient Http { get; set; }
-
-    public class FishingRecord
-    {
-        public string PlayerName { get; set; } = "";
-        public string FishName { get; set; } = "";
-        public double Length { get; set; }
-    }
+    public class FishingRecord { public string PlayerName { get; set; } = ""; public string FishName { get; set; } = ""; public double Length { get; set; } }
 
     protected override void OnInitialized()
     {
-        // 1. Setup the hardcoded ecosystem immediately so the HTML can draw the dropdown
         Engine.Initialize(); 
-        
-        // Ensure we have a default selected species for the dropdown
         var allSpecies = Engine.GetAllSpeciesNames();
-        if (allSpecies.Any())
-        {
-            _selectedSpecies = allSpecies.First();
-        }
+        if (allSpecies.Any()) _selectedSpecies = allSpecies.First();
 
         _minigameTimer = new System.Timers.Timer(50);
         _minigameTimer.Elapsed += (s, e) => MinigameTick();
+        
+        Engine.OnStateChanged += StateHasChanged;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            // 2. Load user save data (requires JS, so it stays here)
             await Engine.LoadAsync(); 
             StateHasChanged();
+        }
+    }
+
+    private async Task SwitchTab(int index)
+    {
+        _activeTab = index;
+
+        if (index == 1 || index == 2)
+        {
+            if (_gameState != GameState.Idle) CancelCast("Switched tab");
+            if (index == 2) await LoadLeaderboard();
         }
     }
 
@@ -337,6 +378,15 @@
         if (_gameState == GameState.Idle) await CastLine();
         else if (_gameState == GameState.Waiting) HandleMinigameOutcome(false); 
         else if (_gameState == GameState.Minigame && Engine.ActiveRod.Type == RodType.Basic) HandleMinigameOutcome(true); 
+    }
+
+    private void HandleVirtualKey(string key)
+    {
+        // Fake a KeyboardEventArgs object to trick the existing logic
+        var args = new KeyboardEventArgs { Key = key, Code = $"Key{key.ToUpper()}" };
+        
+        // Pass it to your existing OnKeyDown handler
+        OnKeyDown(args);
     }
 
     private async Task CastLine()
@@ -351,6 +401,19 @@
         StateHasChanged();
 
         _actionTimer = new Timer(_ => TriggerBite(), null, new Random().Next(2000, 4000), Timeout.Infinite);
+    }
+
+    private int GetQteButtonCount()
+    {
+        // Map the Difficulty Enum to the number of buttons
+        return Engine.ActiveRod.Difficulty switch
+        {
+            QteDifficulty.Easy => 4,    // 2x2 Grid
+            QteDifficulty.Medium => 6,  // 3x2 Grid
+            QteDifficulty.Hard => 8,    // 4x2 Grid
+            QteDifficulty.Expert => 12, // 4x3 Grid
+            _ => 4
+        };
     }
 
     private void TriggerBite()
@@ -372,15 +435,7 @@
             StateHasChanged();
             _minigameTimer.Start();
             await Task.Delay(50);
-
-            try 
-            {
-                if (Engine.ActiveRod.Type == RodType.Ascii) 
-                    await JS.InvokeVoidAsync("eval", "document.getElementById('hacker-input').focus()");
-                else 
-                    await gameContainer.FocusAsync(); 
-            }
-            catch { }
+            try { if (Engine.ActiveRod.Type == RodType.Ascii) await JS.InvokeVoidAsync("eval", "document.getElementById('hacker-input').focus()"); else await gameContainer.FocusAsync(); } catch { }
         });
     }
 
@@ -393,43 +448,26 @@
 
     private void OnKeyDown(KeyboardEventArgs e)
     {
-        switch (_gameState)
+        if (_gameState == GameState.Idle || _gameState == GameState.Waiting)
         {
-            case GameState.Idle:
-                if (e.Code == "Space")
-                {
-                    _ = HandleMainAction();
-                }
-                break;
-
-            case GameState.Waiting:
-                if (e.Code == "Space")
-                {
-                    _ = HandleMainAction();
-                }
-                break;
-
-            case GameState.Minigame:
-                minigameHud?.HandleExternalKeyPress(e);
-                break;
+            if (e.Code == "Space") _ = HandleMainAction();
+        }
+        else if (_gameState == GameState.Minigame)
+        {
+            minigameHud?.HandleExternalKeyPress(e);
         }
     }
+
     private IEnumerable<RodDef> GetVisibleRods()
     {
         var visibleRods = new List<RodDef>();
         bool nextUnlockableFound = false;
 
-        // The list in the Engine is already sorted by cost
         foreach (var rod in Engine.AvailableRods)
         {
-            if (rod.IsUnlocked)
-            {
-                visibleRods.Add(rod);
-            }
-            // If the rod is locked AND we haven't found the next one to show yet...
+            if (rod.IsUnlocked) visibleRods.Add(rod);
             else if (!nextUnlockableFound)
             {
-                // ...show this one, and then stop showing any more locked rods.
                 visibleRods.Add(rod);
                 nextUnlockableFound = true;
             }
@@ -446,81 +484,40 @@
         if (success)
         {
             _lastCatch = await Engine.GenerateCatch();
-            _splashMessage = ""; // Clear any error message
-
+            _splashMessage = "";
             try 
             {
                 var isRecord = await Http.GetFromJsonAsync<bool>($"api/fishing/check-record/{_lastCatch.Name}/{_lastCatch.Length}");
-                if (isRecord)
-                {
-                    // Trigger the UI Dialog
-                    _showRecordDialog = true;
-                }
+                if (isRecord) _showRecordDialog = true;
             }
-            catch 
-            {
-                // Ignore if server is offline, just proceed normally
-            }
+            catch { }
         }
         else
         {
-            _lastCatch = null; // Ensure we don't show a fish
-            _splashMessage = "It got away..."; // Set the feedback message
+            _lastCatch = null;
+            _splashMessage = "Got away...";
         }
 
-        // Show the splash for both success and failure
         _showSplash = true;
-        Task.Delay(2000).ContinueWith(_ => { _showSplash = false; InvokeAsync(StateHasChanged); });
+        Task.Delay(1500).ContinueWith(_ => { _showSplash = false; InvokeAsync(StateHasChanged); });
         StateHasChanged();
-    
     }
 
     private async Task SubmitRecord()
     {
         if (string.IsNullOrWhiteSpace(_playerNameInput)) _playerNameInput = "AAA";
         
-        var record = new 
-        {
-            PlayerName = _playerNameInput.ToUpper(),
-            FishName = _lastCatch.Name,
-            Length = _lastCatch.Length,
-            RodUsed = Engine.ActiveRod.Name.ToString()
-        };
+        var record = new { PlayerName = _playerNameInput.ToUpper(), FishName = _lastCatch.Name, Length = _lastCatch.Length, RodUsed = Engine.ActiveRod.Name };
 
         try
         {
             await Http.PostAsJsonAsync("api/fishing", record);
-            await Achievements.Unlock(
-                "fishing_record", 
-                "Angler Legend", 
-                $"Set a new world record for {_lastCatch.Name}!"
-            );
-
+            await Achievements.Unlock("fishing_record", "Angler Legend", $"New world record for {_lastCatch.Name}!");
         }
-        catch { /* Handle network error */ }
+        catch { }
 
         _showRecordDialog = false;
-    }
-
-
-    private async Task OnTabChanged(int index)
-    {
-        _activeTab = index;
-        
-        // Index 2 is the third tab (Records)
-        if (index == 1 || index == 2) // They clicked away
-        {
-            // If they had a line in the water, cancel it!
-            if (_gameState == GameState.Waiting || _gameState == GameState.Casting || _gameState == GameState.Minigame)
-            {
-                CancelCast("Line reeled in (Tab switched).");
-            }
-            if (index == 2)
-            {
-                // Fetch the high scores
-                await LoadLeaderboard();
-            }
-        }
+        _playerNameInput = "";
     }
 
     private async Task OnSpeciesChanged(string species)
@@ -535,29 +532,11 @@
         StateHasChanged();
         try
         {
-            
-            var options = new JsonSerializerOptions 
-            { 
-                PropertyNameCaseInsensitive = true 
-            };
-
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             var results = await Http.GetFromJsonAsync<List<FishingRecord>>($"api/fishing/top/{_selectedSpecies}", options);
-            
-            if (results != null) 
-            {
-                _leaderboard = results;
-            }
-            else
-            {
-                Console.WriteLine($"[Leaderboard Error] Null Values");
-            }
+            if (results != null) _leaderboard = results;
         }
-        catch (Exception ex)
-        {
-            // Temporary debug log so you can see exactly WHY it failed in the browser console
-            Console.WriteLine($"[Leaderboard Error] {ex.Message}");
-            _leaderboard.Clear();
-        }
+        catch { _leaderboard.Clear(); }
 
         _isLoadingLeaderboard = false;
         StateHasChanged();
@@ -565,14 +544,9 @@
 
     private void CancelCast(string reason)
     {
-        Console.WriteLine(reason);
-
-        if (_biteCts != null)
-        {
-            _biteCts.Cancel();
-            _biteCts.Dispose();
-            _biteCts = null;
-        }
+        _biteCts?.Cancel();
+        _biteCts?.Dispose();
+        _biteCts = null;
 
         if (_actionTimer != null)
         {
@@ -583,8 +557,7 @@
 
         _gameState = GameState.Idle;
         _isCasting = false;
-
-        InvokeAsync(StateHasChanged);
+        StateHasChanged();
     }
 
     private string GetButtonText() => _gameState switch { GameState.Idle => "CAST LINE", GameState.Waiting => "WAIT...", GameState.Minigame => Engine.ActiveRod.Type == RodType.Basic ? "REEL IN!" : "FIGHTING!", _ => "..." };
@@ -595,5 +568,6 @@
         Engine.OnStateChanged -= StateHasChanged;
         _minigameTimer?.Dispose();
         _actionTimer?.Dispose();
+        _biteCts?.Cancel();
     }
 }

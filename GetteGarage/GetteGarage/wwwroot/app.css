@@ -225,6 +225,27 @@ h1:focus {
     margin-right: 12px !important;
 }
 
+.mud-tooltip {
+    background-color: #121324 !important; /* Indigo background */
+    border: 1px solid #f6a91f !important; /* Orange border */
+    color: #e0e0e0 !important; /* Light gray text */
+    
+    /* Retro Font */
+    font-family: 'Press Start 2P', cursive !important;
+    font-size: 0.6rem !important;
+    padding: 8px 12px !important;
+    
+    /* Sharp edges */
+    border-radius: 0 !important; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.8) !important;
+    text-transform: uppercase;
+}
+
+/* Style the little arrow pointing down to the item */
+.mud-tooltip .mud-tooltip-arrow {
+    color: #f6a91f !important; /* Match the border color */
+}
+
 
 #crt-layer {
     position: fixed;

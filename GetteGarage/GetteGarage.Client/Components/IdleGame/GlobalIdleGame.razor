@@ -17,28 +17,32 @@
             <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Error" OnClick="Close" Size="Size.Small"/>
         </div>
         
-        <div style="min-height: 400px; background: #000;">
+        <div class="console-body d-flex flex-column" style="height: 80vh; max-height: 750px; position: relative;">
             @if (_currentMode == GameMode.Menu)
             {
-                <div class="pa-4" style="background: #111; height: 100%;">
+                <div class="pa-4 flex-grow-1" style="background: #111;">
                     <MudText Typo="Typo.body1" Color="Color.Primary" Align="Align.Center" Class="mb-4 press-start">SELECT CARTRIDGE</MudText>
                     
-                    <div class="game-viewport relative">
+                    <div class="d-flex flex-column gap-4">
                         <!-- Fishing Cartridge -->
                         <div class="cartridge fishing-cart" @onclick="() => LoadGame(GameMode.Fishing)">
                             <MudIcon Icon="@Icons.Material.Filled.Phishing" Size="Size.Large" />
                             <div class="ml-4">
-                                <MudText Typo="Typo.subtitle2" Class="press-start">FISHING RPG</MudText>
+                                <MudText Typo="Typo.subtitle2" Class="press-start">FISH QUICK</MudText>
                                 <MudText Typo="Typo.caption">v1.0 • AUTO-SAVE</MudText>
                             </div>
                         </div>
 
                         <!-- Coding Cartridge -->
-                        <div class="cartridge coding-cart" @onclick="() => LoadGame(GameMode.Coding)">
+                        <div class="cartridge coding-cart locked-cart">
+
+                            <div class="coming-soon-ribbon">
+                                COMING SOON
+                            </div>
                             <MudIcon Icon="@Icons.Material.Filled.Code" Size="Size.Large" />
                             <div class="ml-4">
                                 <MudText Typo="Typo.subtitle2" Class="press-start">DEV SIMULATOR</MudText>
-                                <MudText Typo="Typo.caption">v2.4 • HACKER MODE</MudText>
+                                <MudText Typo="Typo.caption">v0.1• HACKER MODE</MudText>
                             </div>
                         </div>
                     </div>
@@ -48,12 +52,16 @@
 
                 @if (_currentMode == GameMode.Fishing)
                 {
+                    <div class="flex-grow-1 d-flex flex-column">
                     <FishingGame />
+                    </div>
                 }
 
                 @if (_currentMode == GameMode.Coding)
                 {
+                    <div class="flex-grow-1 d-flex flex-column">
                     <CodingGame />
+                    </div>
                 }
         </div>
 
@@ -88,8 +96,50 @@
     .fishing-cart { background: #0d47a1; color: white; border: 2px solid #42a5f5; }
     .fishing-cart:hover { background: #1565c0; box-shadow: 0 0 10px #42a5f5; }
 
-    .coding-cart { background: #1b5e20; color: #00ff00; border: 2px solid #00ff00; }
+    .coding-cart { 
+        background: #111; /* Darker background */
+        color: #444;      /* Dimmed text */
+        border: 2px solid #333; 
+        position: relative; /* Crucial for the ribbon */
+        overflow: hidden;   /* Crucial for the ribbon */
+    }
     .coding-cart:hover { background: #2e7d32; box-shadow: 0 0 10px #00ff00; }
+
+    .locked-cart {
+        cursor: not-allowed;
+    }
+    .locked-cart:hover {
+        transform: none; /* Disable the 'slide right' hover effect */
+        box-shadow: none;
+    }
+
+    .coming-soon-ribbon {
+        position: absolute;
+        top: 25px;
+        right: -30px;
+        background: #f1c40f; /* Warning Yellow */
+        color: #000;
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.4rem;
+        font-weight: bold;
+        padding: 4px 30px;
+        text-align: center;
+        
+        /* Rotate it 45 degrees to cut across the corner */
+        transform: rotate(45deg);
+        
+        /* Optional: Add 'Caution Tape' stripes */
+        background-image: repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 5px,
+            rgba(0,0,0,0.1) 5px,
+            rgba(0,0,0,0.1) 10px
+        );
+        
+        box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        z-index: 10;
+    }
 </style>
 
 @code {

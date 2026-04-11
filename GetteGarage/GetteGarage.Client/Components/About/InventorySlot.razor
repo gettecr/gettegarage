@@ -1,4 +1,4 @@
-<MudTooltip Text="@Name">
+<MudTooltip Text="@Name" Placement="Placement.Top" Arrow="true" >
     <div class="inv-slot cursor-pointer">
         <MudIcon Icon="@Icon" Size="Size.Medium" Color="Color.Primary" />
     </div>
@@ -18,6 +18,10 @@
         background: rgba(246, 169, 31, 0.1);
         transform: scale(1.1);
         box-shadow: 0 0 10px rgba(246, 169, 31, 0.4);
+    }
+    .inv-slot:active {
+        transform: scale(0.95);
+        background: rgba(246, 169, 31, 0.3);
     }
 </style>
 

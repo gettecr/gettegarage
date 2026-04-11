@@ -1,0 +1,51 @@
+<div class="virtual-gamepad">
+    <div class="pad-row">
+        <MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowUp" Color="Color.Primary" Variant="Variant.Filled" 
+                       Class="pad-btn" OnClick="@(() => SendKey("W"))" />
+    </div>
+    <div class="pad-row">
+        <MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowLeft" Color="Color.Primary" Variant="Variant.Filled" 
+                       Class="pad-btn" OnClick="@(() => SendKey("A"))" />
+        <MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowDown" Color="Color.Primary" Variant="Variant.Filled" 
+                       Class="pad-btn mx-2" OnClick="@(() => SendKey("S"))" />
+        <MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowRight" Color="Color.Primary" Variant="Variant.Filled" 
+                       Class="pad-btn" OnClick="@(() => SendKey("D"))" />
+    </div>
+</div>
+
+<style>
+    .virtual-gamepad {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+    .pad-row {
+        display: flex;
+        justify-content: center;
+    }
+    .pad-btn {
+        width: 50px;
+        height: 50px;
+        border: 2px solid #2d2e45 !important;
+        background: #111 !important;
+        box-shadow: 0 4px 0 #000;
+        transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .pad-btn:active {
+        transform: translateY(4px);
+        box-shadow: 0 0 0 #000;
+        background: #f6a91f !important;
+        color: #000 !important;
+    }
+</style>
+
+@code {
+    [Parameter] public EventCallback<string> OnKeyPress { get; set; }
+
+    private async Task SendKey(string key)
+    {
+        await OnKeyPress.InvokeAsync(key);
+    }
+}

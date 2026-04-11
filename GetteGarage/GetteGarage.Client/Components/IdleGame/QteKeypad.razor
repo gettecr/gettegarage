@@ -1,0 +1,94 @@
+@using MudBlazor
+@rendermode InteractiveWebAssembly
+
+<div class="qte-pad-container">
+    <!-- Apply an inline style to dynamically change the number of columns -->
+    <div class="qte-grid" style="grid-template-columns: repeat(@Columns, 1fr);">
+        @foreach (var key in _shuffledKeys)
+        {
+            <MudButton Variant="Variant.Filled" 
+                       Color="@(key == TargetKey ? Color.Secondary : Color.Dark)" 
+                       Class="qte-btn" 
+                       OnClick="@(() => OnKeyTapped.InvokeAsync(key))">
+                @key
+            </MudButton>
+        }
+    </div>
+</div>
+
+<style>
+    .qte-pad-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    
+    .qte-grid {
+        display: grid;
+        gap: 8px;
+        width: 90%;
+        max-width: 300px;
+    }
+
+    .qte-btn {
+        height: 55px; /* Slightly shorter so big grids fit on screen */
+        font-family: 'Press Start 2P', cursive !important;
+        font-size: 1rem !important; /* Slightly smaller text */
+        border: 2px solid #333 !important;
+        box-shadow: 0 4px 0 #000;
+        transition: transform 0.1s, box-shadow 0.1s;
+        min-width: 0; /* Prevents buttons from overflowing the grid */
+    }
+
+    .qte-btn:active {
+        transform: translateY(4px);
+        box-shadow: 0 0 0 #000;
+    }
+</style>
+
+@code {
+    [Parameter] public string TargetKey { get; set; } = "A";
+    [Parameter] public int ButtonCount { get; set; } = 4; // Default to Novice
+    [Parameter] public EventCallback<string> OnKeyTapped { get; set; }
+
+    private List<string> _shuffledKeys = new();
+    private string _lastTarget = "";
+
+    // Determine columns based on total buttons to keep it looking nice
+    private int Columns => ButtonCount <= 4 ? 2 : (ButtonCount <= 6 ? 3 : 4);
+
+    private readonly string[] _alphabet = { "A","B","C","D","E","F","G","H","J","K","L","M","N","P","Q","R","S","T","V","W","X","Y","Z" };
+
+    protected override void OnParametersSet()
+    {
+        // Regenerate if the target OR the difficulty changes
+        if (TargetKey != _lastTarget || _shuffledKeys.Count != ButtonCount)
+        {
+            GeneratePad();
+            _lastTarget = TargetKey;
+        }
+    }
+
+    private void GeneratePad()
+    {
+        var rng = new Random();
+        _shuffledKeys.Clear();
+        
+        // 1. Always include the correct answer
+        _shuffledKeys.Add(TargetKey);
+
+        // 2. Fill the rest with random, incorrect letters
+        while (_shuffledKeys.Count < ButtonCount)
+        {
+            string randomKey = _alphabet[rng.Next(_alphabet.Length)];
+            if (!_shuffledKeys.Contains(randomKey))
+            {
+                _shuffledKeys.Add(randomKey);
+            }
+        }
+
+        // 3. Shuffle the list so the correct answer moves around
+        _shuffledKeys = _shuffledKeys.OrderBy(x => rng.Next()).ToList();
+    }
+}
