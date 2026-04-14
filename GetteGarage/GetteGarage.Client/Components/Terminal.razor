@@ -60,7 +60,11 @@
     private string CurrentInput = "";
     private ElementReference inputElement;
     
-    class TermLine { public string? Text { get; set; } public string? CssClass { get; set; } }
+    class TermLine 
+    { 
+        public string Text { get; set; } = ""; 
+        public string CssClass { get; set; } = ""; 
+    }
     private List<TermLine> History = new() {
         new TermLine { Text = "Welcome to GETTEGARAGEOS v1.0. Type <b>help</b> for commands.", CssClass = "text-info" }
     };

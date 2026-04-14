@@ -251,7 +251,6 @@
 </style>
 
 @code {
-    private bool _loaded = false;
     private int YearsExperience => DateTime.Now.Year - 2012;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -259,7 +258,6 @@
         if (firstRender)
         {
             await Task.Delay(200); 
-            _loaded = true;
             StateHasChanged();
         }
     }

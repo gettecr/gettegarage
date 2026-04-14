@@ -56,7 +56,7 @@
 
 @code {
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; }= default!;
-    [Parameter] public WorkshopBoard.ArtItem? Item { get; set; }
+    [Parameter] public WorkshopBoard.ArtItem Item { get; set; } = default!;
     void Close() => MudDialog.Close(DialogResult.Ok(true));
 
     private string DisplayImageUrl = "";

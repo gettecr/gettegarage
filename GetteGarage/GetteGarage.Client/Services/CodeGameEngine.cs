@@ -13,7 +13,7 @@ public class CodeGameEngine : IDisposable
     // The runtime state
     public List<CodeGameUpgradeDefinition> Upgrades { get; private set; } = new();
     public CodeGameState State { get; private set; } = new();
-    public event Action OnStateChanged;
+    public event Action? OnStateChanged;
 
     private System.Timers.Timer _gameLoopTimer;
     private System.Timers.Timer _autoSaveTimer;

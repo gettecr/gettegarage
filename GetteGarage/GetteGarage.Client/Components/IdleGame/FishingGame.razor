@@ -373,9 +373,20 @@
 
     private async Task HandleMainAction()
     {
-        if (_gameState == GameState.Idle) await CastLine();
-        else if (_gameState == GameState.Waiting) HandleMinigameOutcome(false); 
-        else if (_gameState == GameState.Minigame && Engine.ActiveRod.Type == RodType.Basic) HandleMinigameOutcome(true); 
+        if (_gameState == GameState.Idle) 
+        {
+            await CastLine();
+        }
+        else if (_gameState == GameState.Waiting) 
+        {
+            
+            await HandleMinigameOutcome(false); 
+        }
+        else if (_gameState == GameState.Minigame && Engine.ActiveRod.Type == RodType.Basic) 
+        {
+            
+            await HandleMinigameOutcome(true); 
+        }
     }
 
     private void HandleVirtualKey(string key)
@@ -418,7 +429,7 @@
 
         InvokeAsync(async () => {
             StateHasChanged();
-            _minigameTimer.Start();
+            _minigameTimer?.Start();
             await Task.Delay(50);
             try { if (Engine.ActiveRod.Type == RodType.Ascii) await JS.InvokeVoidAsync("eval", "document.getElementById('hacker-input').focus()"); else await gameContainer.FocusAsync(); } catch { }
         });
@@ -462,7 +473,7 @@
 
     private async Task HandleMinigameOutcome(bool success)
     {
-        _minigameTimer.Stop();
+        _minigameTimer?.Stop();
         _actionTimer?.Dispose();
         _gameState = GameState.Idle;
 
@@ -484,12 +495,19 @@
         }
 
         _showSplash = true;
-        Task.Delay(1500).ContinueWith(_ => { _showSplash = false; InvokeAsync(StateHasChanged); });
+        _ = Task.Run(async () => 
+        {
+            await Task.Delay(1500);
+            _showSplash = false;
+            await InvokeAsync(StateHasChanged);
+        });
         StateHasChanged();
     }
 
     private async Task SubmitRecord()
     {
+        if (_lastCatch == null) return;
+
         if (string.IsNullOrWhiteSpace(_playerNameInput)) _playerNameInput = "AAA";
         
         var record = new { PlayerName = _playerNameInput.ToUpper(), FishName = _lastCatch.Name, Length = _lastCatch.Length, RodUsed = Engine.ActiveRod.Name };

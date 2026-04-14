@@ -325,8 +325,6 @@
 
 @code {
 
-    private string? _selectedId = null; 
-
     public class ArtItem
     {
         public string Title { get; set; } = "";
@@ -369,7 +367,6 @@
     {
         await ScrollTo(selectedId);
         
-        _selectedId = null;
         StateHasChanged();
     }
     }

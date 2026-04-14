@@ -17,14 +17,14 @@ namespace GetteGarage.Client.Services
         public double TotalMoney { get; private set; } = 0.0;
         
         public List<RodDef> AvailableRods { get; private set; } = new();
-        public RodDef? ActiveRod { get; private set; }
+        public RodDef ActiveRod { get; private set; }= new();
         public VisualTheme CurrentTheme { get; private set; } = new();
 
         public Dictionary<string, PlayerFishRecord> PersonalBests { get; private set; } = new();
         
         private Dictionary<RodType, List<FishDef>> _fishEcosystem = new();
         
-        public event Action OnStateChanged;
+        public event Action? OnStateChanged;
 
         public FishingGameEngine(ILocalStorageService localStorage)
         {
