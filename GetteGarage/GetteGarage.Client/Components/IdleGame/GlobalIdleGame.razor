@@ -8,7 +8,14 @@
             <div class="d-flex align-center">
                 @if(_currentMode != GameMode.Menu)
                 {
-                    <MudIconButton Icon="@Icons.Material.Filled.Eject" Color="Color.Warning" Size="Size.Small" OnClick="EjectCartridge" Class="mr-2"/>
+                    <MudButton StartIcon="@Icons.Material.Filled.Eject" 
+                            Color="Color.Warning" 
+                            Size="Size.Small" 
+                            OnClick="EjectCartridge" 
+                            Class="mr-2"
+                            Style="font-family: 'Press Start 2P'; font-size: 0.5rem; letter-spacing: 1px;">
+                        EJECT
+                    </MudButton>
                 }
                 <MudText Typo="Typo.caption" Color="Color.Secondary" Style="font-family: 'Press Start 2P'; font-size: 0.6rem;">
                     @GetTitle()

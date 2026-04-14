@@ -39,11 +39,11 @@ namespace GetteGarage.Client.Services
             {
                 new RodDef { Id="rod_1", Name="Basic Rod", Description="1 Click Catch", Type=RodType.Basic, UnlockCost=0, IsUnlocked=true },
                 new RodDef { Id="rod_qte_easy", Name="Novice QTE", Description="Home Row Keys", Type=RodType.Qte, Difficulty=QteDifficulty.Easy, UnlockCost=50 },
-                new RodDef { Id="rod_ascii", Name="Hacker Rod", Description="Type Words", Type=RodType.Ascii, UnlockCost=250 },
-                new RodDef { Id="rod_qte_med", Name="Adept QTE", Description="Home Row Double-Time", Type=RodType.Qte, Difficulty=QteDifficulty.Medium, UnlockCost=1000 },
-                new RodDef { Id="rod_rhythm", Name="Disco Rod", Description="DDR Arrows", Type=RodType.Rhythm, UnlockCost=5000 },
-                new RodDef { Id="rod_qte_hard", Name="Journeyman QTE", Description="Top & Home Row", Type=RodType.Qte, Difficulty=QteDifficulty.Hard, UnlockCost=15000 },
-                new RodDef { Id="rod_qte_exp", Name="Pro QTE", Description="Letters & Numbers", Type=RodType.Qte, Difficulty=QteDifficulty.Expert, UnlockCost=50000 }
+                new RodDef { Id="rod_ascii", Name="Hacker Rod", Description="Type Words", Type=RodType.Ascii, UnlockCost=500 },
+                new RodDef { Id="rod_qte_med", Name="Adept QTE", Description="Home Row Double-Time", Type=RodType.Qte, Difficulty=QteDifficulty.Medium, UnlockCost=2000 },
+                new RodDef { Id="rod_rhythm", Name="Disco Rod", Description="DDR Arrows", Type=RodType.Rhythm, UnlockCost=10000 },
+                new RodDef { Id="rod_qte_hard", Name="Journeyman QTE", Description="Top & Home Row", Type=RodType.Qte, Difficulty=QteDifficulty.Hard, UnlockCost=50000 },
+                new RodDef { Id="rod_qte_exp", Name="Pro QTE", Description="Letters & Numbers", Type=RodType.Qte, Difficulty=QteDifficulty.Expert, UnlockCost=100000 }
             };
             
             AvailableRods = AvailableRods.OrderBy(r => r.UnlockCost).ToList();
