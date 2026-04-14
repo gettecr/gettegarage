@@ -2,7 +2,7 @@
 @using System.Threading.Tasks
 
 <div class="minigame-overlay" @onclick:stopPropagation>
-    @if (ActiveRod.Type == RodType.Basic)
+    @if (ActiveRod?.Type == RodType.Basic)
     {
         <!-- Wrapped in a clickable div so the user can just click the overlay directly -->
         <div @onclick="() => OnComplete.InvokeAsync(true)" style="cursor: pointer; padding: 10px 0;">
@@ -12,7 +12,7 @@
             <MudText Typo="Typo.caption" Class="text-white">Or press Spacebar</MudText>
         </div>
     }
-    else if (ActiveRod.Type == RodType.Qte)
+    else if (ActiveRod?.Type == RodType.Qte)
     {
         <MudText Typo="Typo.caption" Class="press-start text-white mb-1 d-block" Style="font-size: 0.6rem;">HIT THE KEY!</MudText>
         
@@ -25,13 +25,13 @@
         <MudProgressLinear Color="Color.Success" Value="@(_qteHits)" Max="@_qteRequired" Class="my-1" Size="Size.Small" />
         <MudText Typo="Typo.caption" Class="text-white" Style="font-size: 0.7rem;">@_qteHits / @_qteRequired</MudText>
     }
-    else if (ActiveRod.Type == RodType.Ascii)
+    else if (ActiveRod?.Type == RodType.Ascii)
     {
         <MudText Typo="Typo.body2" Class="text-success mb-1" Style="font-family: monospace; font-size: 0.8rem;">> TYPE: @_asciiTarget</MudText>
         <input type="text" @bind="_asciiInput" @bind:event="oninput" @onkeyup="CheckAsciiInput" 
                class="ascii-input" placeholder="_" id="hacker-input" />
     }
-    else if (ActiveRod.Type == RodType.Rhythm)
+    else if (ActiveRod?.Type == RodType.Rhythm)
     {
         <MudText Typo="Typo.caption" Class="press-start text-white mb-2 d-block" Style="font-size: 0.6rem;">FEEL THE BEAT!</MudText>
         
@@ -100,7 +100,7 @@
 </style>
 
 @code {
-    [Parameter] public RodDef ActiveRod { get; set; }
+    [Parameter] public RodDef? ActiveRod { get; set; }
     [Parameter] public double TimeLeft { get; set; }
     [Parameter] public double TotalTime { get; set; }
     [Parameter] public EventCallback<bool> OnComplete { get; set; }
@@ -126,9 +126,9 @@
 
     private class RhythmNode 
     {
-        public string Symbol { get; set; }
-        public string PrimaryKey { get; set; }
-        public string AltKey { get; set; }
+        public string Symbol { get; set; } = "";
+        public string PrimaryKey { get; set; } = "";
+        public string AltKey { get; set; } = "";
         public bool IsHit { get; set; }
     }
     private List<RhythmNode> _rhythmSequence = new();
@@ -136,16 +136,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (ActiveRod.Type == RodType.Qte)
+        if (ActiveRod?.Type == RodType.Qte)
         {
             _qteRequired = ActiveRod.Difficulty switch { QteDifficulty.Easy => 4, QteDifficulty.Medium => 4, QteDifficulty.Hard => 6, QteDifficulty.Expert => 8, _ => 4 };
             await GenerateNextQteKey();
         }
-        else if (ActiveRod.Type == RodType.Ascii) 
+        else if (ActiveRod?.Type == RodType.Ascii) 
         {
             _asciiTarget = _asciiWords[new Random().Next(_asciiWords.Length)];
         }
-        else if (ActiveRod.Type == RodType.Rhythm)
+        else if (ActiveRod?.Type == RodType.Rhythm)
         {
             GenerateRhythmSequence();
         }
@@ -183,7 +183,7 @@
         await InvokeAsync(StateHasChanged);
         await Task.Delay(10);
 
-        var pool = ActiveRod.Difficulty switch { QteDifficulty.Easy => QteEasy, QteDifficulty.Medium => QteEasy, QteDifficulty.Hard => QteMedium, QteDifficulty.Expert => QteExpert, _ => QteEasy };
+        var pool = ActiveRod?.Difficulty switch { QteDifficulty.Easy => QteEasy, QteDifficulty.Medium => QteEasy, QteDifficulty.Hard => QteMedium, QteDifficulty.Expert => QteExpert, _ => QteEasy };
         _qteTargetKey = pool[new Random().Next(pool.Length)];
         await OnTargetKeyChanged.InvokeAsync(_qteTargetKey);
         _isPopping = true;
@@ -192,13 +192,13 @@
 
     public void HandleExternalKeyPress(KeyboardEventArgs e)
     {
-        if (ActiveRod.Type == RodType.Basic && (e.Code == "Space" || e.Code == "Enter"))
+        if (ActiveRod?.Type == RodType.Basic && (e.Code == "Space" || e.Code == "Enter"))
         {
             OnComplete.InvokeAsync(true);
             return;
         }
 
-        if (ActiveRod.Type == RodType.Qte)
+        if (ActiveRod?.Type == RodType.Qte)
         {
             if (e.Key.Length > 1) return; // Ignore modifier keys (Shift, Ctrl, etc)
             
@@ -217,7 +217,7 @@
             }
         }
 
-        if (ActiveRod.Type == RodType.Rhythm)
+        if (ActiveRod?.Type == RodType.Rhythm)
         {
             var targetNode = _rhythmSequence[_rhythmCurrentIndex];
             

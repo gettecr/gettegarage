@@ -93,13 +93,13 @@
 @code {
     [Parameter] public VisualTheme Theme { get; set; } = new();
     [Parameter] public GameState State { get; set; }
-    [Parameter] public RodDef ActiveRod { get; set; }
+    [Parameter] public RodDef? ActiveRod { get; set; }
     [Parameter] public bool IsCasting { get; set; }
     [Parameter] public int BobberX { get; set; }
-    [Parameter] public CaughtFish LastCatch { get; set; }
+    [Parameter] public CaughtFish? LastCatch { get; set; }
     [Parameter] public bool ShowSplash { get; set; }
-    [Parameter] public RenderFragment ChildContent { get; set; }
-    [Parameter] public string SplashMessage { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string SplashMessage { get; set; } = "";
 
     private string GetBackgroundStyle() => string.IsNullOrEmpty(Theme?.BackgroundUrl) ? "" : $"background-image: url('{Theme.BackgroundUrl}');";
     private string GetWaterStyle() => string.IsNullOrEmpty(Theme?.WaterOverlayUrl) ? "" : $"background-image: url('{Theme.WaterOverlayUrl}'); background-repeat: repeat-x;";

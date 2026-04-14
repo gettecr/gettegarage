@@ -14,9 +14,9 @@ public class VisualTheme
 
 public class RodDef 
 {
-    public string Id { get; set; }
-    public string Name { get; set; }
-    public string Description { get; set; }
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string Description { get; set; } = "";
     public RodType Type { get; set; }
     public QteDifficulty Difficulty { get; set; } = QteDifficulty.Easy; 
     public int UnlockCost { get; set; }
@@ -49,7 +49,7 @@ public class CaughtFish
 
 public class PlayerFishRecord
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
     public int Count { get; set; }
     public double MaxLength { get; set; }
 }

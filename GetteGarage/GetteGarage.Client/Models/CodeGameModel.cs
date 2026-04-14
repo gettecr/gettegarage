@@ -17,7 +17,7 @@ public class CodeGameState
 // Separate the "Save Data" from the "Game Logic"
 public class CodeGameUpgradeState
 {
-    public string Id { get; set; }
+    public string Id { get; set; } = "";
     public int Level { get; set; }
     public bool IsUnlocked { get; set; }
 }
@@ -25,9 +25,9 @@ public class CodeGameUpgradeState
 // This class is used by the Engine at runtime
 public class CodeGameUpgradeDefinition
 {
-    public string Id { get; set; }
-    public string Name { get; set; }
-    public string Description { get; set; }
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string Description { get; set; } = "";
     public double BaseCost { get; set; }
     public double CostMultiplier { get; set; } = 1.3;
     
@@ -44,8 +44,8 @@ public class CodeGameUpgradeDefinition
 public class CodeGameCodeModule
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public string Name { get; set; }
-    public string Type { get; set; } // "Frontend", "Backend", "Database", "Utility"
+    public string Name { get; set; } = "";
+    public string Type { get; set; }  = "";// "Frontend", "Backend", "Database", "Utility"
     
     // Stats
     public double BaseProduction { get; set; }

@@ -151,23 +151,23 @@ namespace GetteGarage.Services
             return freshPosts;
         }
 
-        class RssRoot { public List<RssItem> Items { get; set; } }
+        class RssRoot { public List<RssItem>? Items { get; set; } }
         
         class RssItem 
         { 
-            public string Title { get; set; }
-            public string Link { get; set; }
-            public string PubDate { get; set; }
-            public string Description { get; set; }
-            public string Content { get; set; }
-            public string Thumbnail { get; set; }
-            public EnclosureObject Enclosure { get; set; } 
+            public string Title { get; set; } = "";
+            public string Link { get; set; } = "";
+            public string PubDate { get; set; } = "";
+            public string Description { get; set; } = "";
+            public string Content { get; set; } = "";
+            public string Thumbnail { get; set; } = "";
+            public EnclosureObject Enclosure { get; set; } = default!;
         }
 
         class EnclosureObject
         {
-            public string Link { get; set; } 
-            public string Type { get; set; } 
+            public string Link { get; set; }  = "";
+            public string Type { get; set; }  = "";
         }
 
         private string ProcessMediaEmbed(string htmlContent, string componentName, string className, string urlTemplate, string retroHeader, string html5PlayerTemplate)

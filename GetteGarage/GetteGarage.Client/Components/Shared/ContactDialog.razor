@@ -86,6 +86,6 @@
 </style>
 
 @code {
-    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }= default!;
     void Cancel() => MudDialog.Cancel();
 }

@@ -17,7 +17,7 @@ namespace GetteGarage.Client.Services
         public double TotalMoney { get; private set; } = 0.0;
         
         public List<RodDef> AvailableRods { get; private set; } = new();
-        public RodDef ActiveRod { get; private set; }
+        public RodDef? ActiveRod { get; private set; }
         public VisualTheme CurrentTheme { get; private set; } = new();
 
         public Dictionary<string, PlayerFishRecord> PersonalBests { get; private set; } = new();

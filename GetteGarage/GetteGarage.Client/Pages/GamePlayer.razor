@@ -36,7 +36,7 @@
 
 
 @code {
-    [Parameter] public string GameSlug { get; set; }
+    [Parameter] public string GameSlug { get; set; } = "";
 
     // Generates the path: /games/super-mario/index.html
     private string GetGameUrl()

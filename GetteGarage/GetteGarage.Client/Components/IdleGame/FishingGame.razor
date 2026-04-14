@@ -315,16 +315,16 @@
 @code {
     private string _splashMessage = ""; 
     private ElementReference gameContainer;
-    private MinigameHUD minigameHud;
+    private MinigameHUD? minigameHud;
 
     private GameState _gameState = GameState.Idle;
     private bool _isCasting = false;
     private int _bobberX = 50;
     private bool _showSplash = false;
-    private CaughtFish _lastCatch;
+    private CaughtFish? _lastCatch;
 
     private Timer? _actionTimer;
-    private System.Timers.Timer _minigameTimer;
+    private System.Timers.Timer? _minigameTimer;
     private double _minigameTimeTotal = 2000;
     private double _minigameTimeLeft = 2000;
     private CancellationTokenSource? _biteCts;

@@ -121,22 +121,22 @@
 </style>
 
 @code {
-    [Parameter] public string Title { get; set; }
-    [Parameter] public string Version { get; set; }
-    [Parameter] public string StaticImage {get; set;}
-    [Parameter] public string AnimatedGif {get; set;}
-    [Parameter] public string Status { get; set; }
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string Version { get; set; } = "";
+    [Parameter] public string StaticImage {get; set;} = "";
+    [Parameter] public string AnimatedGif {get; set;} = "";
+    [Parameter] public string Status { get; set; } = "";
     [Parameter] public Color StatusColor { get; set; }
-    [Parameter] public string Description { get; set; }
-    [Parameter] public string TechStack { get; set; }
-    [Parameter] public string PlayLink { get; set; }
+    [Parameter] public string Description { get; set; } = "";
+    [Parameter] public string TechStack { get; set; } = "";
+    [Parameter] public string PlayLink { get; set; } = "";
 
     [Parameter] public bool DisableButton {get; set;} = false;
-    [Parameter] public string ButtonText {get; set;}
+    [Parameter] public string ButtonText {get; set;} = "";
 
     [Parameter] public bool OpenGames {get; set;} = false;
 
-        private void OpenIdleGames() {
+    private void OpenIdleGames() {
 
         var options = new DialogOptions 
         { 
