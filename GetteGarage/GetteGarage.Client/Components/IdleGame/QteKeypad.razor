@@ -1,18 +1,58 @@
 @using MudBlazor
+@using GetteGarage.Client.Models 
 @rendermode InteractiveWebAssembly
 
 <div class="qte-pad-container">
-    <!-- Apply an inline style to dynamically change the number of columns -->
-    <div class="qte-grid" style="grid-template-columns: repeat(@Columns, 1fr);">
-        @foreach (var key in _shuffledKeys)
-        {
-            <MudButton Variant="Variant.Filled" 
-                       Color="@(key == TargetKey ? Color.Secondary : Color.Dark)" 
-                       Class="qte-btn" 
-                       OnClick="@(() => OnKeyTapped.InvokeAsync(key))">
-                @key
-            </MudButton>
-        }
+    <div class="virtual-keyboard">
+        
+        <!-- ROW 1: Numbers (Only active on Expert) -->
+        <div class="keyboard-row">
+            @foreach (var key in _rowNumbers)
+            {
+                <button class="key-btn @GetKeyClass(key, QteDifficulty.Expert)" 
+                        disabled="@(!IsKeyActive(QteDifficulty.Expert))"
+                        @onclick="@(() => OnKeyTapped.InvokeAsync(key))">
+                    @key
+                </button>
+            }
+        </div>
+
+        <!-- ROW 2: Top Row (Active on Hard & Expert) -->
+        <div class="keyboard-row row-offset-1">
+            @foreach (var key in _rowTop)
+            {
+                <button class="key-btn @GetKeyClass(key, QteDifficulty.Hard)" 
+                        disabled="@(!IsKeyActive(QteDifficulty.Hard))"
+                        @onclick="@(() => OnKeyTapped.InvokeAsync(key))">
+                    @key
+                </button>
+            }
+        </div>
+
+        <!-- ROW 3: Home Row (Always Active) -->
+        <div class="keyboard-row row-offset-2">
+            @foreach (var key in _rowHome)
+            {
+                <button class="key-btn @GetKeyClass(key, QteDifficulty.Easy)" 
+                        disabled="@(!IsKeyActive(QteDifficulty.Easy))"
+                        @onclick="@(() => OnKeyTapped.InvokeAsync(key))">
+                    @key
+                </button>
+            }
+        </div>
+
+        <!-- ROW 4: Bottom Row (Active on Hard & Expert) -->
+        <div class="keyboard-row row-offset-3">
+            @foreach (var key in _rowBottom)
+            {
+                <button class="key-btn @GetKeyClass(key, QteDifficulty.Expert)" 
+                        disabled="@(!IsKeyActive(QteDifficulty.Expert))"
+                        @onclick="@(() => OnKeyTapped.InvokeAsync(key))">
+                    @key
+                </button>
+            }
+        </div>
+
     </div>
 </div>
 
@@ -22,73 +62,118 @@
         display: flex;
         justify-content: center;
         margin-bottom: 1rem;
+        /* Prevent double-tap zoom on mobile */
+        touch-action: manipulation; 
     }
     
-    .qte-grid {
-        display: grid;
-        gap: 8px;
-        width: 90%;
-        max-width: 300px;
+    .virtual-keyboard {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        width: 100%;
+        max-width: 360px; 
+        padding: 5px;
+        background: #0a0a1f;
+        border: 2px solid #333;
+        border-radius: 4px;
     }
 
-    .qte-btn {
-        height: 55px; /* Slightly shorter so big grids fit on screen */
-        font-family: 'Press Start 2P', cursive !important;
-        font-size: 1rem !important; /* Slightly smaller text */
-        border: 2px solid #333 !important;
-        box-shadow: 0 4px 0 #000;
-        transition: transform 0.1s, box-shadow 0.1s;
-        min-width: 0; /* Prevents buttons from overflowing the grid */
+    .keyboard-row {
+        display: flex;
+        justify-content: center;
+        gap: 4px;
     }
 
-    .qte-btn:active {
-        transform: translateY(4px);
-        box-shadow: 0 0 0 #000;
+    /* Slight offsets to mimic a real staggered QWERTY layout */
+    .row-offset-1 { padding-left: 10px; }
+    .row-offset-2 { padding-left: 20px; }
+    .row-offset-3 { padding-left: 40px; justify-content: flex-start; }
+
+    /* The Base Key Styling */
+    .key-btn {
+        width: 32px;
+        height: 38px;
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: bold;
+        font-size: 0.9rem;
+        color: #e0e0e0;
+        background: #2d2e45;
+        border: 1px solid #111;
+        border-radius: 3px;
+        box-shadow: 0 3px 0 #050510;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.05s, box-shadow 0.05s, background-color 0.2s;
+    }
+
+    /* Active (Click) State */
+    .key-btn:active:not(:disabled) {
+        transform: translateY(3px);
+        box-shadow: 0 0 0 #050510;
+        background: #f6a91f !important;
+        color: #000 !important;
+    }
+
+    /* Dimmed / Inactive Keys */
+    .key-btn:disabled {
+        opacity: 0.3;
+        background: #111;
+        cursor: not-allowed;
+        box-shadow: 0 1px 0 #000;
+    }
+
+    /* The Target Key (Blinks to help you find it) */
+    .key-target {
+        background: #cf4024 !important; /* Stand out Red */
+        color: #fff !important;
+        border-color: #ff0000 !important;
+        animation: target-pulse 0.5s infinite alternate;
+    }
+
+    @@keyframes target-pulse {
+        from { box-shadow: 0 3px 0 #050510, 0 0 5px #cf4024; }
+        to { box-shadow: 0 3px 0 #050510, 0 0 15px #cf4024; }
+    }
+    
+    /* Mobile tweaks to fit 10 keys across perfectly */
+    @@media (max-width: 400px) {
+        .key-btn { width: 24px; height: 30px; font-size: 0.8rem; }
+        .row-offset-1 { padding-left: 8px; }
+        .row-offset-2 { padding-left: 16px; }
+        .row-offset-3 { padding-left: 32px; }
     }
 </style>
 
 @code {
     [Parameter] public string TargetKey { get; set; } = "A";
-    [Parameter] public int ButtonCount { get; set; } = 4; // Default to Novice
+    
+    // We now take the exact Difficulty enum instead of an integer ButtonCount
+    [Parameter] public QteDifficulty Difficulty { get; set; } = QteDifficulty.Easy;
+    
     [Parameter] public EventCallback<string> OnKeyTapped { get; set; }
 
-    private List<string> _shuffledKeys = new();
-    private string _lastTarget = "";
+    // QWERTY Layout Definitions
+    private readonly string[] _rowNumbers = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" };
+    private readonly string[] _rowTop     = { "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P" };
+    private readonly string[] _rowHome    = { "A", "S", "D", "F", "G", "H", "J", "K", "L" };
+    private readonly string[] _rowBottom  = { "Z", "X", "C", "V", "B", "N", "M" };
 
-    // Determine columns based on total buttons to keep it looking nice
-    private int Columns => ButtonCount <= 4 ? 2 : (ButtonCount <= 6 ? 3 : 4);
-
-    private readonly string[] _alphabet = { "A","B","C","D","E","F","G","H","J","K","L","M","N","P","Q","R","S","T","V","W","X","Y","Z" };
-
-    protected override void OnParametersSet()
+    // Determines if a specific row should be clickable/bright based on difficulty
+    private bool IsKeyActive(QteDifficulty requiredDifficulty)
     {
-        // Regenerate if the target OR the difficulty changes
-        if (TargetKey != _lastTarget || _shuffledKeys.Count != ButtonCount)
-        {
-            GeneratePad();
-            _lastTarget = TargetKey;
-        }
+        return Difficulty >= requiredDifficulty;
     }
 
-    private void GeneratePad()
+    // Assigns CSS classes: Dimmed (disabled), Normal, or Target (flashing red)
+    private string GetKeyClass(string key, QteDifficulty requiredDifficulty)
     {
-        var rng = new Random();
-        _shuffledKeys.Clear();
-        
-        // 1. Always include the correct answer
-        _shuffledKeys.Add(TargetKey);
-
-        // 2. Fill the rest with random, incorrect letters
-        while (_shuffledKeys.Count < ButtonCount)
+        if (key == TargetKey && IsKeyActive(requiredDifficulty))
         {
-            string randomKey = _alphabet[rng.Next(_alphabet.Length)];
-            if (!_shuffledKeys.Contains(randomKey))
-            {
-                _shuffledKeys.Add(randomKey);
-            }
+            return "key-target"; // This is the one they need to press!
         }
-
-        // 3. Shuffle the list so the correct answer moves around
-        _shuffledKeys = _shuffledKeys.OrderBy(x => rng.Next()).ToList();
+        
+        return ""; // Normal active key styling
     }
 }

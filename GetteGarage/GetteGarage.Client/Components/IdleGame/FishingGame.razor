@@ -74,11 +74,9 @@
                 {
                     @if (Engine.ActiveRod.Type == RodType.Qte)
                     {
-                        <!-- NEW: The Dynamic QTE Keypad -->
-                        <!-- We need to pass the current required key from your MinigameHUD -->
                         <QteKeypad TargetKey="@_currentQteTarget" 
-                                   ButtonCount="@GetQteButtonCount()" 
-                                   OnKeyTapped="HandleVirtualKey" />
+                            Difficulty="@Engine.ActiveRod.Difficulty" 
+                            OnKeyTapped="HandleVirtualKey" />
                     }
                     else if (Engine.ActiveRod.Type == RodType.Rhythm)
                     {
@@ -401,19 +399,6 @@
         StateHasChanged();
 
         _actionTimer = new Timer(_ => TriggerBite(), null, new Random().Next(2000, 4000), Timeout.Infinite);
-    }
-
-    private int GetQteButtonCount()
-    {
-        // Map the Difficulty Enum to the number of buttons
-        return Engine.ActiveRod.Difficulty switch
-        {
-            QteDifficulty.Easy => 4,    // 2x2 Grid
-            QteDifficulty.Medium => 6,  // 3x2 Grid
-            QteDifficulty.Hard => 8,    // 4x2 Grid
-            QteDifficulty.Expert => 12, // 4x3 Grid
-            _ => 4
-        };
     }
 
     private void TriggerBite()
