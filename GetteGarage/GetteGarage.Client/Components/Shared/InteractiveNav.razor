@@ -1,6 +1,7 @@
 @using MudBlazor
 @inject NavigationManager Nav
 @rendermode InteractiveWebAssembly
+@implements IDisposable
 
 <MudAppBar Elevation="0" Fixed="true" 
                    Style="background: rgba(5, 5, 16, 0.9); backdrop-filter: blur(8px); border-bottom: 1px solid #333; height: 64px;">
@@ -11,7 +12,7 @@
                     Class="d-flex d-md-none" />
 
     <MudIconButton Icon="@Icons.Material.Filled.Home" Color="Color.Primary" 
-                    Edge="Edge.Start" Href="/" Class="d-none d-md-flex" />
+                    Edge="Edge.Start" Href="/" Class="d-none d-md-flex" data-enhance-nav="false"/>
     
     <MudText Typo="Typo.button" Class="ml-4 d-none d-sm-flex" Color="Color.Inherit" 
                 Style="font-family: 'Press Start 2P'; font-size: 0.8rem;">
@@ -50,12 +51,12 @@
     </MudDrawerHeader>
     
     <MudNavMenu Class="pa-2">
-        <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home" Match="NavLinkMatch.All" Class="drawer-nav-link">HOME</MudNavLink>
+        <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home" Match="NavLinkMatch.All" Class="drawer-nav-link" data-enhance-nav="false">HOME</MudNavLink>
         <MudDivider Class="my-2" />
-        <MudNavLink Href="/workshop" Icon="@Icons.Material.Filled.Work" Class="drawer-nav-link">WORKSHOP</MudNavLink>
-        <MudNavLink Href="/blog" Icon="@Icons.Material.Filled.Book" Class="drawer-nav-link">DEV_LOG</MudNavLink>
+        <MudNavLink Href="/workshop" Icon="@Icons.Material.Filled.Work" Class="drawer-nav-link" data-enhance-nav="false">WORKSHOP</MudNavLink>
+        <MudNavLink Href="/blog"  Icon="@Icons.Material.Filled.Book" Class="drawer-nav-link">DEV_LOG</MudNavLink>
         <MudNavLink Href="/arcade" Icon="@Icons.Material.Filled.Gamepad" Class="drawer-nav-link">ARCADE</MudNavLink>
-        <MudNavLink Href="/about" Icon="@Icons.Material.Filled.Person" Class="drawer-nav-link">CREDITS</MudNavLink>
+        <MudNavLink Href="/about"  Icon="@Icons.Material.Filled.Person" Class="drawer-nav-link">CREDITS</MudNavLink>
         <MudNavLink Href="/community" Icon="@Icons.Material.Filled.Public" Class="drawer-nav-link">COMMUNITY</MudNavLink>
     </MudNavMenu>
 </MudDrawer>
@@ -121,6 +122,27 @@
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
+    }
+
+    protected override void OnInitialized()
+    {
+        Nav.LocationChanged += CloseDrawerOnNavigate;
+    }
+
+    // 2. The event handler that closes the drawer
+    private void CloseDrawerOnNavigate(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        if (_drawerOpen)
+        {
+            _drawerOpen = false;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    // 3. Clean up the listener when the component is destroyed
+    public void Dispose()
+    {
+        Nav.LocationChanged -= CloseDrawerOnNavigate;
     }
 
     private string GetSectionTitle()
