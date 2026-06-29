@@ -35,8 +35,8 @@ namespace GetteGarage.Services
                 catch { /* If deserialization fails, fall through to fetch fresh data */ }
             }
 
-            // 2. FETCH FRESH DATA DIRECTLY FROM THE RSS FEED (Bypassing rss2json middleman)
-            string targetUrl = "https://gettegarage.substack.com/feed";
+            // 2. FETCH FRESH DATA DIRECTLY FROM THE RSS FEED 
+            string targetUrl = "https://rss-proxy.gettegarage.com/?url=https://gettegarage.substack.com/feed";
             var freshPosts = new List<BlogPost>();
 
             try 
@@ -44,7 +44,7 @@ namespace GetteGarage.Services
                 using var client = new HttpClient();
                 client.Timeout = TimeSpan.FromSeconds(180); // Don't hang forever
                 
-                // Crucial step: Set a real browser User-Agent so Substack doesn't reject the request
+                // Set a real browser User-Agent so Substack doesn't reject the request
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
                 
                 // Get the raw XML string from the RSS feed
