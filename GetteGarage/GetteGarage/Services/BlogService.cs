@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Xml.Linq;
 using GetteGarage.Data;
 using GetteGarage.Models;
 
@@ -8,8 +9,6 @@ namespace GetteGarage.Services
     {
         private readonly IServiceScopeFactory _scopeFactory;
 
-        // We use IServiceScopeFactory because BlogService might be registered as a Singleton,
-        // but GameDbContext is Scoped. This safely creates a short-lived DB connection.
         public BlogService(IServiceScopeFactory scopeFactory)
         {
             _scopeFactory = scopeFactory;
@@ -23,7 +22,6 @@ namespace GetteGarage.Services
             // 1. CHECK THE CACHE 
             var cache = db.BlogCache.FirstOrDefault(c => c.Id == 1);
             
-            // If cache exists, is less than 24 hours old, and we aren't forcing a refresh, use it!
             if (cache != null && !forceRefresh && (DateTime.UtcNow - cache.LastUpdated).TotalHours < 24)
             {
                 try
@@ -37,9 +35,8 @@ namespace GetteGarage.Services
                 catch { /* If deserialization fails, fall through to fetch fresh data */ }
             }
 
-            // 2. FETCH FRESH DATA FROM EXTERNAL API
+            // 2. FETCH FRESH DATA DIRECTLY FROM THE RSS FEED (Bypassing rss2json middleman)
             string targetUrl = "https://gettegarage.substack.com/feed";
-            string apiUrl = $"https://api.rss2json.com/v1/api.json?rss_url={targetUrl}";
             var freshPosts = new List<BlogPost>();
 
             try 
@@ -47,8 +44,58 @@ namespace GetteGarage.Services
                 using var client = new HttpClient();
                 client.Timeout = TimeSpan.FromSeconds(180); // Don't hang forever
                 
-                var json = await client.GetStringAsync(apiUrl);
-                var data = JsonSerializer.Deserialize<RssRoot>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                // Crucial step: Set a real browser User-Agent so Substack doesn't reject the request
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+                
+                // Get the raw XML string from the RSS feed
+                var xmlContent = await client.GetStringAsync(targetUrl);
+                
+                // Parse the XML
+                var doc = XDocument.Parse(xmlContent);
+                
+                // Define standard namespaces used in RSS feeds
+                XNamespace contentNs = "http://purl.org/rss/1.0/modules/content/";
+                XNamespace mediaNs = "http://search.yahoo.com/mrss/";
+
+                var items = doc.Descendants("item").Select(item => 
+                {
+                    // Map the enclosure node if it exists
+                    var enclosureEl = item.Element("enclosure");
+                    EnclosureObject? enclosure = null;
+                    if (enclosureEl != null)
+                    {
+                        enclosure = new EnclosureObject
+                        {
+                            Link = enclosureEl.Attribute("url")?.Value ?? "",
+                            Type = enclosureEl.Attribute("type")?.Value ?? ""
+                        };
+                    }
+
+                    // Substack puts full HTML inside content:encoded
+                    var contentElement = item.Element(contentNs + "encoded");
+                    string content = contentElement?.Value ?? item.Element("description")?.Value ?? "";
+
+                    // Attempt to locate an image in media:content or media:thumbnail
+                    var mediaContentEl = item.Element(mediaNs + "content");
+                    var mediaThumbnailEl = item.Element(mediaNs + "thumbnail");
+                    string thumbnail = mediaContentEl?.Attribute("url")?.Value 
+                                        ?? mediaThumbnailEl?.Attribute("url")?.Value 
+                                        ?? "";
+
+                    return new RssItem
+                    {
+                        Title = item.Element("title")?.Value ?? "",
+                        Link = item.Element("link")?.Value ?? "",
+                        PubDate = item.Element("pubDate")?.Value ?? "",
+                        Description = item.Element("description")?.Value ?? "",
+                        Content = content,
+                        Thumbnail = thumbnail,
+                        Enclosure = enclosure ?? new EnclosureObject()
+                    };
+                }).ToList();
+
+                // Re-create the parent data container 
+                var data = new RssRoot { Items = items };
                 
                 if (data?.Items != null)
                 {
@@ -122,14 +169,12 @@ namespace GetteGarage.Services
             }
             catch (Exception ex)
             {
-                // If the external API fails, but we have an old cache, return the stale cache anyway!
                 if (cache != null)
                 {
                     var stalePosts = JsonSerializer.Deserialize<List<BlogPost>>(cache.SerializedPosts);
                     if (stalePosts != null) return stalePosts;
                 }
 
-                // Absolute worst case: return the error so you can see it
                 return new List<BlogPost> { new BlogPost { Title = "Network Error", Summary = ex.Message, Slug = "error" } };
             }
 
