@@ -1,374 +1,46 @@
 @using MudBlazor
+@using GetteGarage.Client.Data
 @rendermode InteractiveWebAssembly
-@inject IDialogService DialogService
-@inject IJSRuntime JS
-@using IdleGame
 
-<!-- 1. THE STICKY SUB-NAV -->
-<div class="workshop-sub-nav px-4">
-    <div class="d-none d-sm-flex gap-4 w-100 justify-center">
-    <MudButton OnClick="@(() => ScrollTo("active-titles"))" Color="Color.Primary" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Gamepad">
-        ACTIVE
-    </MudButton>
-    <MudButton OnClick="@(() => ScrollTo("prototypes"))" Color="Color.Secondary" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Science" Class="d-none d-sm-inline-flex">
-        PROTOTYPES
-    </MudButton>
-    <MudButton OnClick="@(() => ScrollTo("art-assets"))" Color="Color.Info" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Brush" Class="d-none d-sm-inline-flex">
-        ART
-    </MudButton>
-    <MudButton OnClick="@(() => ScrollTo("legacy"))" Color="Color.Tertiary" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.History">
-        LEGACY
-    </MudButton>
-    </div>
+<!-- Portfolio -->
+<MudChipSet T="string" SelectionMode="SelectionMode.MultiSelection" @bind-SelectedValues="_selectedTags" CheckMark="true" Class="mb-4">
+    @foreach (var tag in _allTags)
+    {
+        <MudChip Value="@tag">@tag</MudChip>
+    }
+</MudChipSet> 
 
-    <div class="d-flex d-sm-none w-100 justify-center">
-        <MudSelect T="string" 
-                   Label="JUMP TO SECTION" 
-                   Variant="Variant.Outlined" 
-                   Dense="true" 
-                   AnchorOrigin="Origin.BottomCenter"
-                   TransformOrigin="Origin.TopCenter"
-                   RelativeWidth="DropdownWidth.Relative"
-                   Style="width: 250px; min-width: 250px;" 
-                   ValueChanged="OnMobileNavChanged"
-                   Class="mobile-jump-menu"
-                   PopoverClass="mobile-jump-popover"
-                   FullWidth="true">
-            
-            <MudSelectItem Value="@("active-titles")">
-                <div class="d-flex align-center"><MudIcon Icon="@Icons.Material.Filled.Gamepad" Size="Size.Small" Class="mr-2"/> ACTIVE</div>
-            </MudSelectItem>
-            
-            <MudSelectItem Value="@("prototypes")">
-                <div class="d-flex align-center"><MudIcon Icon="@Icons.Material.Filled.Science" Size="Size.Small" Class="mr-2"/> PROTOTYPES</div>
-            </MudSelectItem>
-            
-            <MudSelectItem Value="@("art-assets")">
-                <div class="d-flex align-center"><MudIcon Icon="@Icons.Material.Filled.Brush" Size="Size.Small" Class="mr-2"/> ART</div>
-            </MudSelectItem>
-            
-            <MudSelectItem Value="@("legacy")">
-                <div class="d-flex align-center"><MudIcon Icon="@Icons.Material.Filled.History" Size="Size.Small" Class="mr-2"/> LEGACY</div>
-            </MudSelectItem>
-
-        </MudSelect>
-    </div>
-</div>
-
-<!-- 2. SECTION: ACTIVE TITLES -->
-<section id="active-titles" class="workshop-section pt-4">
-    <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-4" Style="font-family: 'Press Start 2P'">
-        ACTIVE TITLES
-    </MudText>
-    
-    <MudGrid>
-        <!-- Big Larry -->
-        <MudItem xs="12" md="6">
-            <StudioGameCard 
-                Title="Big Larry's Beach Baseball" 
-                Version="v1.0" Status="LIVE" StatusColor="Color.Tertiary"
-                Description="'Shooting gallery' gameplay with batting cage timing and Larry. What's not to love?"
-                TechStack="Godot, WebGL"
-                StaticImage="/art/big_larrys_thumbnail.png"
-                AnimatedGif="/art/big-larry-card.gif"
-                ButtonText="LAUNCH"
-                PlayLink="/play/big-larrys-beach-baseball" />
-        </MudItem>
-
-        <!-- Tidebreaker -->
-        <MudItem xs="12" md="6">
-            <StudioGameCard 
-                Title="Tidebreaker" 
-                Version="v1.2" Status="LIVE" StatusColor="Color.Tertiary"
-                Description="Breakout. But with 100% more water."
-                TechStack="Godot, WebGL"
-                StaticImage="/art/tidebreaker_thumbnail.png"
-                AnimatedGif="/art/tidebreaker-card.gif"
-                ButtonText="LAUNCH"
-                PlayLink="/play/tidebreaker" />
-        </MudItem>
-
-                <!-- Fishing -->
-        <MudItem xs="12" md="4">
-            <StudioGameCard 
-                Title="Fish Quick" 
-                Version="v1.0" Status="BUILT IN" StatusColor="Color.Info"
-                Description="A Cast lines and catch fish type game."
-                TechStack="Blazor WASM"
-                ButtonText="GO FISH!"
-                OpenGames=true
-                StaticImage="/art/FishQuick.png"
-                 /> 
-        </MudItem>
-
-        <!-- Gette Garage (The Site) -->
-        <MudItem xs="12" md="4">
-            <StudioGameCard 
-                Title="Gette Garage" 
-                Version="v1.0" Status="SYSTEM" StatusColor="Color.Warning"
-                Description="This website. Full-stack .NET web app."
-                TechStack=".NET 8, Azure"
-                StaticImage="/art/gettegarage.png"
-                ButtonText="CODE BASE"
-                PlayLink="https://github.com/gettecr/gettegarage" />
-        </MudItem>
-    </MudGrid>
-</section>
-
-<MudDivider Class="my-12" Style="opacity: 0.2; border-color: #f6a91f;" />
-
-<!-- SECTION: PROTOTYPES & R&D -->
-<section id="prototypes" class="workshop-section">
-    <MudText Typo="Typo.h5" Color="Color.Secondary" Class="mb-4" Style="font-family: 'Press Start 2P'">
-        PROTOTYPES & R&D
-    </MudText>
-
-    <!-- PRODUCTION ROADMAP -->
-    <MudText Typo="Typo.h6" Color="Color.Warning" Class="mb-4 mt-6" Style="font-family: 'Press Start 2P'; font-size: 0.8rem;">
-        /// STUDIO ROADMAP
-    </MudText>
-
-    <MudPaper Class="pa-6 mb-12" Style="background: rgba(0,0,0,0.2); border: 1px dashed #f6a91f;">
-        <MudTimeline TimelinePosition="TimelinePosition.Start">
-            <MudTimelineItem Color="Color.Success" Size="Size.Small">
-                <ItemOpposite><MudText Typo="Typo.caption" Color="Color.Success">NOW</MudText></ItemOpposite>
-                <ItemContent>
-                    <MudText Typo="Typo.subtitle2" Color="Color.Success" Style="font-family: 'Press Start 2P'; font-size: 0.7rem;">GETTE GARAGE LAUNCH</MudText>
-                    <MudText Typo="Typo.body2">Personal site deployed. Fish Quick v1.0 in progress.</MudText>
-                </ItemContent>
-            </MudTimelineItem>
-
-            <MudTimelineItem Color="Color.Warning" Size="Size.Small">
-                <ItemOpposite><MudText Typo="Typo.caption" Color="Color.Warning">2026</MudText></ItemOpposite>
-                <ItemContent>
-                    <MudText Typo="Typo.subtitle2" Color="Color.Warning" Style="font-family: 'Press Start 2P'; font-size: 0.7rem;">FOR THE BIRDS</MudText>
-                    <MudText Typo="Typo.body2">Short demo of title: farming sim meets viva pinata/pokopia for birds</MudText>
-                </ItemContent>
-            </MudTimelineItem>
-
-            <MudTimelineItem Color="Color.Dark" Size="Size.Small">
-                <ItemOpposite><MudText Typo="Typo.caption" Style="color: #666;">TBD</MudText></ItemOpposite>
-                <ItemContent>
-                    <MudText Typo="Typo.subtitle2" Style="color: #888; font-family: 'Press Start 2P'; font-size: 0.7rem;">STEAM DEBUT</MudText>
-                    <MudText Typo="Typo.body2" Style="color: #888;">PC Port of "For The Birds" with expanded mechanics.</MudText>
-                </ItemContent>
-            </MudTimelineItem>
-        </MudTimeline>
-    </MudPaper>
-
-    <!-- PROTOTYPE GRID -->
-    <MudText Typo="Typo.h6" Color="Color.Secondary" Class="mb-4" Style="font-family: 'Press Start 2P'; font-size: 0.8rem;">
-        /// EXPERIMENTAL CONCEPTS AND WORKS IN PROGRESS
-    </MudText>
-
-    <MudGrid>
-        <MudItem xs="12" md="6">
-            <StudioGameCard 
-                Title="For The Birds" 
-                Version="ALPHA 0.3" Status="PROTOTYPE" StatusColor="Color.Warning"
-                Description="Grow your bird sanctuary, attract the birds"
-                TechStack="Godot 4"
-                ButtonText="COMING SOON"
-                StaticImage="/art/forthebirds.png"
-                AnimatedGif="/art/forthebirds.gif"
-                DisableButton=true
-                PlayLink="#" />
-        </MudItem>
-
-        <MudItem xs="12" md="6">
-            <StudioGameCard 
-                Title="Trash Bandit" 
-                Version="CONCEPT" Status="R&D" StatusColor="Color.Secondary"
-                Description="Raccoon jump good in a DK '94 style platformer"
-                TechStack="Godot 4"
-                ButtonText="CONCEPT"
-                StaticImage="/art/trashbandit.png"
-                AnimatedGif="/art/trashbandit.gif"
-                DisableButton=true
-                PlayLink="#" />
-        </MudItem>
-
-
-        <!-- Dev Simulator -->
-        <MudItem xs="12" md="4">
-            <StudioGameCard 
-                Title="Idle Dev Simulator" 
-                Version="v2.4" Status="COMING SOON" StatusColor="Color.Info"
-                Description="Write code, drink coffee, squash bugs and upgrade your system."
-                TechStack="Blazor WASM"
-                ButtonText="COMING SOON"
-                DisableButton=true
-                PlayLink="#" />
-        </MudItem>
-    </MudGrid>
-</section>
-
-<MudDivider Class="my-12" Style="opacity: 0.2; border-color: #f6a91f;" />
-
-<!-- SECTION: ART & ASSETS -->
-<section id="art-assets" class="workshop-section">
-    <MudText Typo="Typo.h5" Color="Color.Info" Class="mb-4" Style="font-family: 'Press Start 2P'">
-        ART & ASSETS
-    </MudText>
-
-    <MudGrid>
-        @foreach (var item in PortfolioItems)
-        {
-            <MudItem xs="12" sm="6" md="4">
-                <MudCard Elevation="3" Class="cursor-pointer hover-zoom" @onclick="() => OpenImage(item)" Style="background: #0a0a1f; border: 1px solid #333;">
-                    <MudCardMedia Image="@item.CoverImage" Height="250" Style="background-size: cover;" />
-                    <MudCardContent>
-                        <MudText Typo="Typo.h6" Style="font-family: 'Rajdhani'; font-weight: bold; color: #e0e0e0;">@item.Title</MudText>
-                        <MudText Typo="Typo.body2" Color="Color.Secondary" Style="font-family: monospace;">@item.Category</MudText>
-                    </MudCardContent>
-                </MudCard>
-            </MudItem>
-        }
-    </MudGrid>
-</section>
-
-<MudDivider Class="my-12" Style="opacity: 0.2; border-color: #f6a91f;" />
-
-<!-- 5. SECTION: LEGACY ARCHIVES -->
-<section id="legacy" class="workshop-section">
-    <MudText Typo="Typo.h5" Color="Color.Tertiary" Class="mb-4" Style="font-family: 'Press Start 2P'">
-        LEGACY ARCHIVES
-    </MudText>
-    <MudText Typo="Typo.body1" Class="mb-4" Color="Color.Secondary" Style="font-family:'Press Start 2P'; font-size:0.7rem;">
-        /// ARCHIVAL WORKS
-    </MudText>
-    
-    <MudGrid>
+<MudGrid>
+    @foreach (var project in _filteredProjects)
+    {
         <MudItem xs="12" sm="6" md="4">
-            <LegacyCard Title="Physics Education Research" Role="PhD Physics" 
-                        Desc="Research on cognitive theories of learning and intuition to understand student difficulties in physics." />
+            <StudioGameCard Title="@project.Title"
+                        Version="@project.Version"
+                        StaticImage="@project.StaticImage"
+                        AnimatedGif="@project.AnimatedGif"
+                        Tag="@project.Tag"
+                        TagColor="@project.TagColor"
+                        Description="@project.Description"
+                        TechStack="@project.TechStack" />
         </MudItem>
-        <MudItem xs="12" sm="6" md="4">
-            <LegacyCard Title="ML/AI Applications" Role="Lead Data Scientist" 
-                        Desc="Developed Image matching, NLP classifiers, quarterly KPI prediction models etc. using AWS/Python." />
-        </MudItem>
-        <MudItem xs="12" sm="6" md="4">
-            <LegacyCard Title="Cloud Infrastructure" Role="Tech Lead (OPM)" 
-                        Desc="Modernized government HR software using Azure, Databricks, and AI-powered workflows." />
-        </MudItem>
-        <MudItem xs="12" sm="6" md="4">
-            <LegacyCard Title="Spectral Analysis" Role="MS Astrophysics" 
-                        Desc="Analyzed spectral data for 100 ATLASGAL sources to find nitrogen hydrides in massive star forming regions." />
-        </MudItem>
-    </MudGrid>
-</section>
-
-<style>
-    /* The Sticky Sub-Nav */
-    .workshop-sub-nav {
-        position: sticky;
-        top: 64px; /* Docks right under your main top app bar */
-        z-index: 5;
-        
-        /* Indigo Glassmorphism */
-        background: rgba(18, 19, 36, 0.95); 
-        backdrop-filter: blur(8px);
-        
-        padding: 12px 0;
-        border-bottom: 1px solid #333;
-        
-        display: flex;
-        align-items: center;
     }
+</MudGrid>
 
-    /* Invisible bumper to stop the header from covering section titles when you jump to them */
-    .workshop-section {
-        scroll-margin-top: 130px; 
-    }
-
-    /* Hover effect for the Art Cards */
-    .hover-zoom {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .hover-zoom:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(246, 169, 31, 0.2);
-        border-color: #f6a91f !important;
-    }
-
-    .mobile-jump-menu .mud-input-label {
-        font-family: 'Press Start 2P'!important;
-        font-size: 0.8rem !important; 
-        color: #f6a91f !important;
-    }
-
-    .mobile-jump-menu .mud-input-slot {
-        font-family: 'Press Start 2P' !important;
-        font-size: 0.7rem !important;
-        padding-top: 16px !important;
-    }
-
-    .mobile-jump-menu .mud-input-outlined-border {
-        border-color: rgba(246, 169, 31, 0.5) !important;
-    }
-
-
-    .mobile-jump-menu fieldset legend {
-    /* Increase the padding around the text inside the border gap */
-    padding-left: 8px !important;
-    padding-right: 60px !important; /* Increase the right side specifically */
-    
-    /* Ensure the legend is wide enough for the custom font */
-    width: auto !important; 
-}
-
-
-    
-
-    
-
-</style>
 
 @code {
 
-    public class ArtItem
-    {
-        public string Title { get; set; } = "";
-        public string Category { get; set; } = ""; 
-        public string CoverImage { get; set; } = "";
-        public string ArtImage {get; set;} = "";
 
-        public string Description { get; set; } = "";
-    }
+    private IReadOnlyCollection<string> _selectedTags = new HashSet<string>();
 
-    // 2. The Data List
-    private List<ArtItem> PortfolioItems = new List<ArtItem>
-    {
-        
-        new ArtItem { Title = "Big Larry Animation", Category = "Pixel Art", CoverImage = "/art/big_larry_share.png",ArtImage = "/art/big_larry_share.gif", Description = "Big Larry's one-handed swing animation." },
-        new ArtItem { Title = "For The Birds - Henry Animation", Category = "Pixel Art",CoverImage = "/art/prototype_henry_share.png", ArtImage = "/art/prototype_henry_share.gif", Description = "Run animation for 'Henry'- protagonist of For The Birds." },
-        new ArtItem {Title = "Rexi pixel art -- OPM", Category = "Pixel Art", CoverImage = "art/opm_pixel_art.png", Description="Various versions of Rexi, the chatbot mascot I made for OPM."},
-        new ArtItem {Title = "The Wranglers -- OPM", Category="Pixel Art", CoverImage = "art/wrangler.png", Description="Team image I made for the 'Data Wranglers' combining jeeps, jeans, and cats."},
-        new ArtItem {Title = "D&D Character Portraits", Category = "Traditional Art", CoverImage="/art/trading_cards_argon.png", ArtImage = "/art/trading_cards.png", Description = "Trading card character portraits. Oil on card stock 2.5\"x3.5\" ea."}
-    };
+    private List<string> _allTags => StudioProjectData.All
+        .Select(p => p.Tag)
+        .Distinct()
+        .OrderBy(t => t)
+        .ToList();
 
-    // 3. The Dialog Logic
-    private void OpenImage(ArtItem item)
-    {
-        // Safe generic DialogParameters for MudBlazor v7
-        var parameters = new DialogParameters<ArtDialog> { { x => x.Item, item } };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-        
-        DialogService.ShowAsync<ArtDialog>(item.Title, parameters, options);
-    }
-
-    private async Task ScrollTo(string id)
-    {
-        await JS.InvokeVoidAsync("scrollToElement", id);
-    }
-
-    private async Task OnMobileNavChanged(string selectedId)
-    {
-        if (!string.IsNullOrEmpty(selectedId))
-    {
-        await ScrollTo(selectedId);
-        
-        StateHasChanged();
-    }
-    }
+    private IEnumerable<StudioProject> _filteredProjects =>
+        _selectedTags.Count == 0
+            ? StudioProjectData.All
+            : StudioProjectData.All.Where(p => _selectedTags.Contains(p.Tag));
 }
+    

@@ -1,7 +1,7 @@
 @using MudBlazor
 
 <MudDialog Class="blueprint-scanner">
-    <DialogContent>
+   <DialogContent>
         <!-- The Grid Overlay -->
         <div class="blueprint-grid"></div>
         
@@ -34,6 +34,7 @@
     </DialogActions>
 </MudDialog>
 
+
 <style>
     .blueprint-scanner {
         background-color: #0d0e1b !important;
@@ -56,7 +57,7 @@
 
 @code {
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; }= default!;
-    [Parameter] public WorkshopBoard.ArtItem Item { get; set; } = default!;
+    [Parameter] public  Item { get; set; } = default!;
     void Close() => MudDialog.Close(DialogResult.Ok(true));
 
     private string DisplayImageUrl = "";
