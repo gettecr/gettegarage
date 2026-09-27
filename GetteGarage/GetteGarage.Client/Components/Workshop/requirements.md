@@ -30,4 +30,3 @@
 ## Clean up project cards code
  - rename studio game card to project card
  - remove old cards
-

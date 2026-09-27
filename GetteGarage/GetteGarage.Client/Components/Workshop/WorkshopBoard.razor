@@ -1,5 +1,8 @@
 @using MudBlazor
 @using GetteGarage.Client.Data
+@inject IDialogService DialogService
+@inject IJSRuntime JS
+
 @rendermode InteractiveWebAssembly
 
 <!-- Portfolio -->
@@ -13,15 +16,16 @@
 <MudGrid>
     @foreach (var project in _filteredProjects)
     {
-        <MudItem xs="12" sm="6" md="4">
-            <StudioGameCard Title="@project.Title"
+        <MudItem xs="12" sm="6" md="4" @onclick="() => OpenProject(project)">
+            <StudioCard Title="@project.Title"
                         Version="@project.Version"
                         StaticImage="@project.StaticImage"
                         AnimatedGif="@project.AnimatedGif"
                         Tag="@project.Tag"
                         TagColor="@project.TagColor"
                         Description="@project.Description"
-                        TechStack="@project.TechStack" />
+                        TechStack="@project.TechStack" 
+			/>
         </MudItem>
     }
 </MudGrid>
@@ -42,5 +46,12 @@
         _selectedTags.Count == 0
             ? StudioProjectData.All
             : StudioProjectData.All.Where(p => _selectedTags.Contains(p.Tag));
+    private void OpenProject(StudioProject item)
+    {
+        var parameters = new DialogParameters<StudioCardDialog> { { x => x.Item, item } };
+        var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.Medium, FullWidth = true, BackdropClick = true, CloseOnEscapeKey = true, NoHeader = true};
+        
+        DialogService.ShowAsync<StudioCardDialog>(item.Title, parameters, options);
+    }
 }
     
