@@ -9,12 +9,11 @@
         <div class="d-flex flex-wrap gap-1">
 		@foreach (var tag in Tags)
 		{
-			<MudChip T="string" Color="@tag.TagColor" Size="Size.Small" Variant="Variant.Filled" Class="press-start-chip">
+			<MudChip T="string" Style="@($"background-color:{tag.HexColor}; color:{tag.TextColor};")"  Size="Size.Small" Variant="Variant.Filled" Class="press-start-chip">
                 	@tag.Name
             		</MudChip>
 
 		}
-            <MudText Typo="Typo.caption" Style="font-family: monospace; opacity: 0.7;">@Version</MudText>
         </div>
 
         <!-- Title -->
@@ -53,6 +52,8 @@
             <MudText Typo="Typo.caption" Color="Color.Secondary" Style="font-family: monospace;">
                 @TechStack
             </MudText>
+
+            <MudText Typo="Typo.caption" Style="font-family: monospace; opacity: 0.7;">@Version</MudText>
         </div>
     </div>
 </MudPaper>

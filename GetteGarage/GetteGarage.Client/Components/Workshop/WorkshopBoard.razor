@@ -9,7 +9,7 @@
 <MudChipSet T="Tag" SelectionMode="SelectionMode.MultiSelection" @bind-SelectedValues="_selectedTags" CheckMark="true" Class="mb-4">
     @foreach (var tag in _allTags)
     {
-        <MudChip Value="@tag" Color= "@tag.TagColor">@tag.Name</MudChip>
+        <MudChip Value="@tag" Style="@($"background-color:{tag.HexColor}; color:{tag.TextColor};")" Class="press-start-chip">@tag.Name</MudChip>
     }
 </MudChipSet> 
 
@@ -28,6 +28,11 @@
         </MudItem>
     }
 </MudGrid>
+
+<style>
+
+ .press-start-chip { font-family: 'Press Start 2P'; font-size: 0.6rem; }
+</style>
 
 
 @code {
