@@ -6,10 +6,10 @@
 @rendermode InteractiveWebAssembly
 
 <!-- Portfolio -->
-<MudChipSet T="string" SelectionMode="SelectionMode.MultiSelection" @bind-SelectedValues="_selectedTags" CheckMark="true" Class="mb-4">
+<MudChipSet T="Tag" SelectionMode="SelectionMode.MultiSelection" @bind-SelectedValues="_selectedTags" CheckMark="true" Class="mb-4">
     @foreach (var tag in _allTags)
     {
-        <MudChip Value="@tag">@tag</MudChip>
+        <MudChip Value="@tag" Color= "@tag.TagColor">@tag.Name</MudChip>
     }
 </MudChipSet> 
 
@@ -21,8 +21,7 @@
                         Version="@project.Version"
                         StaticImage="@project.StaticImage"
                         AnimatedGif="@project.AnimatedGif"
-                        Tag="@project.Tag"
-                        TagColor="@project.TagColor"
+                        Tags="@project.Tags"
                         Description="@project.Description"
                         TechStack="@project.TechStack" 
 			/>
@@ -34,18 +33,18 @@
 @code {
 
 
-    private IReadOnlyCollection<string> _selectedTags = new HashSet<string>();
+    private IReadOnlyCollection<Tag> _selectedTags = new HashSet<Tag>();
 
-    private List<string> _allTags => StudioProjectData.All
-        .Select(p => p.Tag)
+    private List<Tag> _allTags => StudioProjectData.All
+        .SelectMany(p => p.Tags)
         .Distinct()
-        .OrderBy(t => t)
+        .OrderBy(t => t.Name)
         .ToList();
 
     private IEnumerable<StudioProject> _filteredProjects =>
         _selectedTags.Count == 0
             ? StudioProjectData.All
-            : StudioProjectData.All.Where(p => _selectedTags.Contains(p.Tag));
+	    : StudioProjectData.All.Where(p => p.Tags.Any(t =>_selectedTags.Contains(t)));
     private void OpenProject(StudioProject item)
     {
         var parameters = new DialogParameters<StudioCardDialog> { { x => x.Item, item } };

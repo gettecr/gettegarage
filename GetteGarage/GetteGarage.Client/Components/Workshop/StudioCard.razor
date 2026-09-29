@@ -1,13 +1,19 @@
 @using MudBlazor
 
+@using GetteGarage.Client.Data
+
 <MudPaper Class="studio-card" >
     <div class="d-flex flex-column" style="height: 100%;">
         
         <!-- Header / Status -->
-        <div class="d-flex justify-space-between align-center mb-2">
-            <MudChip T="string" Color="@TagColor" Size="Size.Small" Variant="Variant.Filled" Class="press-start-chip">
-                @Tag
-            </MudChip>
+        <div class="d-flex flex-wrap gap-1">
+		@foreach (var tag in Tags)
+		{
+			<MudChip T="string" Color="@tag.TagColor" Size="Size.Small" Variant="Variant.Filled" Class="press-start-chip">
+                	@tag.Name
+            		</MudChip>
+
+		}
             <MudText Typo="Typo.caption" Style="font-family: monospace; opacity: 0.7;">@Version</MudText>
         </div>
 
@@ -104,8 +110,7 @@
     [Parameter] public string Version { get; set; } = "";
     [Parameter] public string StaticImage {get; set;} = "";
     [Parameter] public string AnimatedGif {get; set;} = "";
-    [Parameter] public string Tag { get; set; } = "";
-    [Parameter] public Color TagColor { get; set; }
+    [Parameter] public List<Tag> Tags {get; set;} = new();
     [Parameter] public string Description { get; set; } = "";
     [Parameter] public string TechStack { get; set; } = "";
 }
