@@ -48,6 +48,7 @@ public static class StudioProjectData
 				Description="This website. Full-stack .NET web app.",
 				TechStack=".NET 8, Azure",
 				StaticImage="/art/gettegarage.png",
+				StoryPath="/stories/gette_garage.md",
 			},
 			new StudioProject
 			{
@@ -68,6 +69,7 @@ public static class StudioProjectData
 				TechStack="Godot 4",
 				StaticImage="/art/trashbandit.png",
 				AnimatedGif="/art/trashbandit.gif",
+				StoryPath="/stories/trash_bandit.md",
 			},
 			new StudioProject
 			{
