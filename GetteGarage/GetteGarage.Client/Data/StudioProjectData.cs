@@ -55,10 +55,11 @@ public static class StudioProjectData
 				Title="For The Birds",
 				Version="ALPHA 0.3",
 				Tags= new() {new Tag("Video Game")},
-				Description="Grow your bird sanctuary, attract the birds",
+				Description="Turn an abandoned golf course into a thriving bird sanctuary. Plant native habitat, attract birds, and photograph them. Think Stardew Valley meets Pokémon Snap.",
 				TechStack="Godot 4",
 				StaticImage="/art/forthebirds.png",
 				AnimatedGif="/art/forthebirds.gif",
+				StoryPath="/stories/for_the_birds.md",
 			},
 			new StudioProject
 			{
@@ -73,44 +74,44 @@ public static class StudioProjectData
 			},
 			new StudioProject
 			{
-				Title="Idle Dev Simulator",
-				Version="v2.4",
-				Tags= new() {new Tag("Video Game")},
-				Description="Write code, drink coffee, squash bugs and upgrade your system.",
-				TechStack="Blazor WASM",
-			},
-			new StudioProject
-			{
-				Title = "Big Larry Animation", 
+				Title = "Pixel Art Animations", 
 				Tags= new() {new Tag("Art")},
 				StaticImage = "/art/big_larry_share.png",
-				AnimatedGif = "/art/big_larry_share.gif", 
-				Description = "Big Larry's one-handed swing animation.",
-				TechStack = "Aesprite"
-			},
-			new StudioProject 
-			{ 
-				Title = "For The Birds - Henry Animation", 
-				Tags= new() {new Tag("Art")},
-				StaticImage = "/art/prototype_henry_share.png", 
-				AnimatedGif = "/art/prototype_henry_share.gif",
-				Description = "Run animation for 'Henry'- protagonist of For The Birds.",
-				TechStack = "Aesprite"
+				AnimatedGif = "/art/big_larry_share.gif",
+				Gallery = new()
+				{
+					new GalleryImage { Src = "/art/big_larry_share.gif", Caption = "Big Larry"},
+					new GalleryImage {Src = "/art/prototype_henry_share.gif", Caption="Henry"},
+					new GalleryImage {Src = "/art/trash_bandit_flip.gif", Caption = "Trash Bandit"},
+				},
+				Description = "Collection of pixel art animations for games.",
+				TechStack = "Aesprite",
+				StoryPath="/stories/pixel_art_animations.md"
 			},
 			new StudioProject 
 			{
-				Title = "Rexi pixel art -- OPM", 
+				Title = "Pixel art -- OPM", 
 				Tags= new() {new Tag("Art")},
 				StaticImage = "art/opm_pixel_art.png",
-				Description="Various versions of Rexi, the chatbot mascot I made for OPM.",
-				TechStack = "Aesprite"
-			},
-			new StudioProject 
-			{
-				Title = "The Wranglers -- OPM", 
-				StaticImage = "art/wrangler.png", 
-				Tags= new() {new Tag("Art")},
-				Description="Team image I made for the 'Data Wranglers' combining jeeps, jeans, and cats.",
+				Gallery = new()
+				{
+					new GalleryImage {Src = "/art/wrangler.png", Caption= "Team image I made for the 'Data Wranglers'"},
+					new GalleryImage {Src="/art/badger.png", Caption= "Badger Jan"},
+		
+					new GalleryImage {Src="/art/digit.png", Caption= "Digit (DGT)"},
+					new GalleryImage {Src="/art/bison.png", Caption= "Design System Dakota"},
+					new GalleryImage {Src="/art/GPPApotamus_big.png", Caption= "GPPApotamus"},
+					new GalleryImage {Src="/art/rexi_spring.png", Caption= "Rexi (Spring)"},
+					new GalleryImage {Src="/art/rexi_summer.png", Caption= "Rexi (Summer)"},
+					new GalleryImage {Src="/art/rexi_fall.png", Caption= "Rexi (Fall)"},
+					new GalleryImage {Src="/art/rexi_winter.png", Caption= "Rexi (Winter)"},
+					new GalleryImage {Src="/art/rexi_prototype.png", Caption= "Rexi (Prototype)"},
+					new GalleryImage {Src="/art/rexi_research.png", Caption= "Rexi (Research)"},
+					new GalleryImage {Src="/art/rexi_cry.png", Caption= "Rexi (Cry)"},
+					new GalleryImage {Src="/art/rexi_hammer.png", Caption= "Rexi (Hammer Pants)"},
+					new GalleryImage {Src="/art/rexi_newyear.png", Caption= "Rexi (New Year)"},
+				},
+				Description="Various pixel art mascots I made for our teams at OPM.",
 				TechStack = "Aesprite"
 			},
 			new StudioProject 
@@ -120,6 +121,15 @@ public static class StudioProjectData
 				StaticImage="/art/trading_cards_argon.png", 
 				AnimatedGif= "/art/trading_cards.png", 
 				Description = "Trading card character portraits. Oil on card stock 2.5\"x3.5\" ea.",
+				Gallery = new()
+				{
+					new GalleryImage {Src="/art/art_smart.png", Caption= "Art"},
+					new GalleryImage {Src="/art/thalmor.png", Caption= "Thalmor"},
+					new GalleryImage {Src="/art/chanel.png", Caption= "Chanel"},
+					new GalleryImage {Src="/art/dorgothy.png", Caption= "Dorgothy"},
+					new GalleryImage {Src="/art/argon.png", Caption= "Argon"},
+					new GalleryImage {Src="/art/erdric.png", Caption= "Erdric"},
+				},
 				TechStack = "Oil on card stock"
 			}
 		};

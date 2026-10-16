@@ -12,6 +12,7 @@ public class StudioProject
     public string Description { get; set; } = "";
     public string TechStack { get; set; } = "";
     public string StoryPath  { get; set; } = "";
+    public List<GalleryImage> Gallery { get; set; } = new();
 }
 
 public class Tag : IEquatable<Tag>

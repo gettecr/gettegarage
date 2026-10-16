@@ -14,11 +14,29 @@
                     @Item.Title
                 </MudText>
 
-                <div class="d-flex justify-center mb-3">
-                    <MudImage Src="@DisplayImageUrl" ObjectFit="ObjectFit.Contain"
-                              Style="max-height: 40vh; max-width: 100%; border: 1px solid #f6a91f;"
-                              Class="blueprint-img" />
-                </div>
+			<MudCarousel TData="GalleryImage" ItemsSource="@_gallery" @bind-SelectedIndex="_slideIndex"
+				Style="height: 40vh;" Class="mb-2"
+				ShowArrows="@(_gallery.Count > 1)"
+				ShowBullets="false"
+				AutoCycle="true"
+				EnableSwipeGesture="true"
+				BulletsColor="Color.Primary">
+				<ItemTemplate>
+					<div class="d-flex justify-center align-center" style="height: 100%;">
+						<MudImage Src="@context.Src" ObjectFit="ObjectFit.Contain"
+							Class="blueprint-img gallery-img"
+							Style="max-height: 100%; max-width: 100%; border: 1px solid #f6a91f;" />
+					</div>
+				</ItemTemplate>
+			</MudCarousel>
+
+			@if (_gallery.Count > 0 && !string.IsNullOrEmpty(_gallery[_slideIndex].Caption))
+			{
+				<MudText Typo="Typo.caption" Class="d-block text-center mb-3"
+					Style="font-family: 'Press Start 2P'; font-size: 0.55rem; color: #f6a91f;">
+					@_gallery[_slideIndex].Caption
+					</MudText>
+			}
 
                 <MudText Typo="Typo.body2" Style="color: #e0e0e0; font-family: 'Rajdhani';">
                     @Item.Description
@@ -99,6 +117,9 @@
         margin-bottom: 12px;
         color: #e0e0e0;
     }
+    .gallery-img {
+    	image-rendering: pixelated;
+    }
     @@media (min-width: 960px) {
         .story-panel {
             border-top: none;
@@ -125,6 +146,7 @@
 </style>
 
 @code {
+    
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; }= default!;
     [Parameter] public StudioProject Item { get; set; } = default!;
     void Close() => MudDialog.Close(DialogResult.Ok(true));
@@ -137,8 +159,18 @@
     private string DisplayImageUrl =>
         !string.IsNullOrEmpty(Item.AnimatedGif) ? Item.AnimatedGif :
         !string.IsNullOrEmpty(Item.StaticImage) ? Item.StaticImage : "";
+
+    private List<GalleryImage> _gallery = new();
+    private int _slideIndex;
+
     protected override async Task OnParametersSetAsync()
     {
+	_gallery = Item.Gallery.Count > 0
+	    ? Item.Gallery
+	    : !string.IsNullOrEmpty(DisplayImageUrl)
+	        ? new() { new GalleryImage {Src = DisplayImageUrl}}
+		: new();
+
         if (!string.IsNullOrEmpty(Item.StoryPath))
         {
             var markdown = await Http.GetStringAsync(Item.StoryPath);
