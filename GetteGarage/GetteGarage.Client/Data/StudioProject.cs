@@ -43,7 +43,7 @@ public static class TagData
 		["Web"]        = "#cf4024", // burnt red (Secondary)
 		["Art"]        = "#2ecc71", // green (Tertiary)
 		["Tool"]       = "#00d9ff", // cyan
-		["Web"]     = "#e91e8c", // magenta
+		["Data"]     = "#e91e8c", // magenta
 		["Misc"]     = "#f4d03f", // yellow	
 	};
 	private const string DefaultHex = "#888888";
