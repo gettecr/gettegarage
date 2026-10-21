@@ -55,7 +55,8 @@ public static class StudioProjectData
 					new GalleryImage {Src="/art/rexi_newyear.png", Caption= "Rexi (New Year)"},
 				},
 				Description="Various pixel art mascots I made for our teams at OPM.",
-				TechStack = "Aesprite"
+				TechStack = "Aesprite",
+				StoryPath = "stories/opm_pixel_art_mascots.md"
 			},
 			new StudioProject
 			{
@@ -91,30 +92,36 @@ public static class StudioProjectData
 					new GalleryImage {Src="/art/argon.png", Caption= "Argon"},
 					new GalleryImage {Src="/art/erdric.png", Caption= "Erdric"},
 				},
-				TechStack = "Oil on card stock"
+				TechStack = "Oil on card stock",
+				StoryPath = "stories/dnd_characters.md"
 			},
 			new StudioProject
 			{
 				Title = "Local Library Genre Analysis",
 				Tags = new() {new Tag("Data")},
 				StaticImage="",
+				Description="An exploratory analysis of a local library's collection, plus an AI-labeled genre breakdown of its fiction section. Which books actually get borrowed?",
 				TechStack="Python, Gemini",
+				StoryPath="/stories/library_analysis.md"
 			},
 			new StudioProject
 			{
 				Title="Fish Quick",
 				Version="v1.0",
 				Tags= new() {new Tag("Video Game")},
-				Description="A Cast lines and catch fish type game.",
+				Description="A fishing game built from quick-time events and keyboard minigames, with emojis standing in for art.",
 				TechStack="Blazor WASM",
 				StaticImage="/art/FishQuick.png",
+				StoryPath="/stories/fish_quick.md"
 			},
 			new StudioProject
 			{
 				Title = "KDE Power Inhibitor",
 				Tags = new() {new Tag("Tool")},
 				StaticImage = "",
+				Description="A tiny set of Linux scripts that keeps your laptop awake while music plays or a DAW is open, without keeping the screen on.",
 				TechStack = "Bash, Manjaro Linux",
+				StoryPath="/stories/kde_power_inhibitor.md"
 			},
 			new StudioProject
 			{
@@ -151,7 +158,9 @@ public static class StudioProjectData
 				Gallery = new()
 				{
 				},
+				Description="Sketchbooks, box drills, and oil portraits. Practice work, not finished products.",
 				TechStack = "Mixed Media",
+				StoryPath = "/stories/figure_drawing.md"
 
 			},
 			new StudioProject
@@ -169,7 +178,9 @@ public static class StudioProjectData
 				Title = "VineScribe: wine note digitizer",
 				Tags = new() {new Tag("Tool")},
 				StaticImage="",
+				Description = "Email a photo of a handwritten wine tasting note and a Raspberry Pi digitizes it. Email a wine label and it tells you if you've tried it before.",
 				TechStack="Gemini, Gmail, Raspberry Pi, Python",
+				StoryPath="/stories/vinescribe.md"
 			},
 		};
 
