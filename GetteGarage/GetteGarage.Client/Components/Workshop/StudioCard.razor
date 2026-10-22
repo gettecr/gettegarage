@@ -1,17 +1,19 @@
 @using MudBlazor
 
-@inject IDialogService DialogService
-@using IdleGame
+@using GetteGarage.Client.Data
 
-<MudPaper Class="studio-card">
+<MudPaper Class="studio-card" >
     <div class="d-flex flex-column" style="height: 100%;">
         
         <!-- Header / Status -->
-        <div class="d-flex justify-space-between align-center mb-2">
-            <MudChip T="string" Color="@StatusColor" Size="Size.Small" Variant="Variant.Filled" Class="press-start-chip">
-                @Status
-            </MudChip>
-            <MudText Typo="Typo.caption" Style="font-family: monospace; opacity: 0.7;">@Version</MudText>
+        <div class="d-flex flex-wrap gap-1">
+		@foreach (var tag in Tags)
+		{
+			<MudChip T="string" Style="@($"background-color:{tag.HexColor}; color:{tag.TextColor};")"  Size="Size.Small" Variant="Variant.Filled" Class="press-start-chip">
+                	@tag.Name
+            		</MudChip>
+
+		}
         </div>
 
         <!-- Title -->
@@ -50,24 +52,8 @@
             <MudText Typo="Typo.caption" Color="Color.Secondary" Style="font-family: monospace;">
                 @TechStack
             </MudText>
-            
-            @if(!string.IsNullOrEmpty(PlayLink))
-            {
-                <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="@PlayLink" Size="Size.Small" Disabled=@DisableButton>
-                    @ButtonText
-                </MudButton>
-            }
-            else if(@OpenGames)
-            {
-                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="OpenIdleGames" Size="Size.Small" Disabled=@DisableButton>
-                    @ButtonText
-                </MudButton>
-            }
-            else {
-                <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="#" Size="Size.Small" Disabled=true>
-                    DISABLED
-                </MudButton>
-            }
+
+            <MudText Typo="Typo.caption" Style="font-family: monospace; opacity: 0.7;">@Version</MudText>
         </div>
     </div>
 </MudPaper>
@@ -125,27 +111,7 @@
     [Parameter] public string Version { get; set; } = "";
     [Parameter] public string StaticImage {get; set;} = "";
     [Parameter] public string AnimatedGif {get; set;} = "";
-    [Parameter] public string Status { get; set; } = "";
-    [Parameter] public Color StatusColor { get; set; }
+    [Parameter] public List<Tag> Tags {get; set;} = new();
     [Parameter] public string Description { get; set; } = "";
     [Parameter] public string TechStack { get; set; } = "";
-    [Parameter] public string PlayLink { get; set; } = "";
-
-    [Parameter] public bool DisableButton {get; set;} = false;
-    [Parameter] public string ButtonText {get; set;} = "";
-
-    [Parameter] public bool OpenGames {get; set;} = false;
-
-    private void OpenIdleGames() {
-
-        var options = new DialogOptions 
-        { 
-            CloseButton = false, 
-            MaxWidth = MaxWidth.Small, 
-            FullWidth = true,
-            BackdropClick = true
-        };
-        
-        DialogService.ShowAsync<GlobalIdleGame>("", options);
-    }
 }

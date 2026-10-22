@@ -130,24 +130,24 @@ namespace GetteGarage.Services
                         // --- FIX SUBSTACK AUDIO & VIDEO EMBEDS ---
 
                         //1. Process Audio
-                        content = ProcessMediaEmbed(
-                            content, 
-                            "AudioPlaceholder", 
-                            "native-audio-embed", 
-                            "https://gettegarage.substack.com/api/v1/audio/upload/{0}/src", 
-                            "AUDIO CLIP", 
-                            "<audio controls style='width: 100%; outline: none;'><source src='{0}' type='audio/mpeg'></audio>"
-                        );
+			content = ProcessMediaEmbed(
+    			    content, 
+    			    "AudioPlaceholder", 
+    			    "native-audio-embed", 
+    			    "https://gettegarage.substack.com/api/v1/audio/upload/{0}/src", 
+    			    "AUDIO CLIP", 
+    			    "<audio controls style='width: 100%; max-width: 500px; display: block; margin: 0 auto; outline: none;'><source src='{0}' type='audio/mpeg'></audio>"
+			);
 
-                        // 2. Process Video
-                        content = ProcessMediaEmbed(
-                            content, 
-                            "VideoPlaceholder", 
-                            "native-video-embed", 
-                            "https://gettegarage.substack.com/api/v1/video/upload/{0}/src", 
-                            "VIDEO CLIP", 
-                            "<video controls style='width: 100%; border-radius: 4px; outline: none;'><source src='{0}' type='video/mp4'></video>"
-                        );
+                        // 2. Process Vide
+			content = ProcessMediaEmbed(
+    				content, 
+    				"VideoPlaceholder", 
+    				"native-video-embed", 
+    				"https://gettegarage.substack.com/api/v1/video/upload/{0}/src", 
+    				"VIDEO CLIP", 
+    				"<video controls style='width: 100%; max-width: 640px; height: auto; display: block; margin: 0 auto; border-radius: 4px; outline: none;'><source src='{0}' type='video/mp4'></video>"
+			);
 
                         return new BlogPost
                         {

@@ -1,0 +1,181 @@
+@using MudBlazor
+@using GetteGarage.Client.Data
+@using Markdig
+@inject HttpClient Http
+
+<MudDialog Class="blueprint-scanner">
+   <DialogContent>
+        <div class="blueprint-grid"></div>
+        
+
+	<MudGrid Class="mt-2" Style="position: relative; z-index: 2;">
+	    <MudItem xs="12" md="5">
+                <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-2" Style="font-family: 'Press Start 2P';">
+                    @Item.Title
+                </MudText>
+
+			<MudCarousel TData="GalleryImage" ItemsSource="@_gallery" @bind-SelectedIndex="_slideIndex"
+				Style="height: 40vh;" Class="mb-2"
+				ShowArrows="@(_gallery.Count > 1)"
+				ShowBullets="false"
+				AutoCycle="true"
+				EnableSwipeGesture="true"
+				BulletsColor="Color.Primary">
+				<ItemTemplate>
+					<div class="d-flex justify-center align-center" style="height: 100%;">
+						<MudImage Src="@context.Src" ObjectFit="ObjectFit.Contain"
+							Class="blueprint-img gallery-img"
+							Style="max-height: 100%; max-width: 100%; border: 1px solid #f6a91f;" />
+					</div>
+				</ItemTemplate>
+			</MudCarousel>
+
+			@if (_gallery.Count > 0 && !string.IsNullOrEmpty(_gallery[_slideIndex].Caption))
+			{
+				<MudText Typo="Typo.caption" Class="d-block text-center mb-3"
+					Style="font-family: 'Press Start 2P'; font-size: 0.55rem; color: #f6a91f;">
+					@_gallery[_slideIndex].Caption
+					</MudText>
+			}
+
+                <MudText Typo="Typo.body2" Style="color: #e0e0e0; font-family: 'Rajdhani';">
+                    @Item.Description
+                </MudText>
+            </MudItem>
+
+            <!-- Right: mini-blog -->
+            <MudItem xs="12" md="7">
+                <div class="story-panel">
+			@if (_storyHtml is null)
+			{
+			    <MudProgressCircular Indeterminate="true" Size="Size.Small" Color="Color.Warning" /> 
+			}
+			else
+			{
+			    @_storyHtml
+			}
+                </div>
+            </MudItem>
+	</MudGrid>
+        
+    </DialogContent>
+    
+    <DialogActions>
+        <MudButton OnClick="Close" Variant="Variant.Text" Color="Color.Error">CLOSE</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+<style>
+    .blueprint-scanner {
+        background-color: #0d0e1b !important;
+        border: 2px solid #f6a91f !important;
+        color: #f6a91f !important;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .blueprint-grid {
+        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        background-image: 
+            linear-gradient(rgba(246, 169, 31, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(246, 169, 31, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+        z-index: 1;
+        pointer-events: none;
+    }
+    .story-panel {
+        border-top: 2px dashed #cf4024;
+        padding-top: 12px;
+        font-family: 'Rajdhani';
+        color: #f6a91f;
+    }
+    .story-panel h1, .story-panel h2, .story-panel h3 {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.85rem;
+        color: #f6a91f;
+        margin: 18px 0 10px;
+        line-height: 1.5;
+    }
+    .story-panel p { margin-bottom: 12px; color: #e0e0e0; }
+    .story-panel strong { color: #f6a91f; }
+    .story-panel a { color: #cf4024; }
+    .story-panel blockquote {
+        border-left: 3px solid #cf4024;
+        padding-left: 12px;
+        margin: 12px 0;
+        opacity: 0.85;
+        font-style: italic;
+    }
+    .story-panel code {
+        background: rgba(246, 169, 31, 0.1);
+        padding: 2px 5px;
+        border-radius: 3px;
+    }
+    .story-panel ul, .story-panel ol {
+        padding-left: 20px;
+        margin-bottom: 12px;
+        color: #e0e0e0;
+    }
+    .gallery-img {
+    	image-rendering: pixelated;
+    }
+    @@media (min-width: 960px) {
+        .story-panel {
+            border-top: none;
+            border-left: 2px dashed #cf4024;
+            padding: 0 0 0 24px;
+            height: 100%;
+            max-height: 65vh;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+
+        /* thin, on-theme scrollbar instead of the default chunky one */
+        .story-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+        .story-panel::-webkit-scrollbar-thumb {
+            background: #cf4024;
+            border-radius: 4px;
+        }
+        .story-panel::-webkit-scrollbar-track {
+            background: transparent;
+        }
+    }
+</style>
+
+@code {
+    
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }= default!;
+    [Parameter] public StudioProject Item { get; set; } = default!;
+    void Close() => MudDialog.Close(DialogResult.Ok(true));
+
+    private MarkupString? _storyHtml;
+    private static readonly MarkdownPipeline Pipeline = new MarkdownPipelineBuilder()
+        .UseAdvancedExtensions()
+        .Build();
+
+    private string DisplayImageUrl =>
+        !string.IsNullOrEmpty(Item.AnimatedGif) ? Item.AnimatedGif :
+        !string.IsNullOrEmpty(Item.StaticImage) ? Item.StaticImage : "";
+
+    private List<GalleryImage> _gallery = new();
+    private int _slideIndex;
+
+    protected override async Task OnParametersSetAsync()
+    {
+	_gallery = Item.Gallery.Count > 0
+	    ? Item.Gallery
+	    : !string.IsNullOrEmpty(DisplayImageUrl)
+	        ? new() { new GalleryImage {Src = DisplayImageUrl}}
+		: new();
+
+        if (!string.IsNullOrEmpty(Item.StoryPath))
+        {
+            var markdown = await Http.GetStringAsync(Item.StoryPath);
+            var html = Markdown.ToHtml(markdown, Pipeline);
+            _storyHtml = new MarkupString(html);
+        }
+    }
+}
