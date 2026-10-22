@@ -30,3 +30,21 @@ structured data. For label checks, the whole tasting database goes into
 the model's context window so it can look for matches and similar wines.
 It takes a quick phone photo, no perfect scans needed, which is
 convenient because wine is usually involved.
+
+I also named it Pterobyte because it's funny.
+
+## Example response
+
+Okay, I didn't find a Klinker Brick Old Vine Zinfandel 2020 in the
+logs, but I did find one Klinker Brick wine you've tried:
+
+**Klinker Brick Farrah Syrah**, Vintage: 2018. Date: 9/28. Notes:
+Smell- ['Grass', 'Smoke', 'Strawberry', 'Blackberry', 'Oak',
+'Vanilla']. Taste- ['Oak', 'Chocolate', 'Vanilla', 'Cloves', 'Smoke',
+'Christmas coziness!']. Verdict: 'LOVE'. Additional Notes: Def get
+again!!
+
+Since Klinker Brick specializes in Lodi wines and Zinfandel is common
+there, it's a reasonable connection. Hope this helps!
+
+Best, Pterobyte

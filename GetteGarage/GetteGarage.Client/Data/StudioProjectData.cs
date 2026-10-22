@@ -40,7 +40,6 @@ public static class StudioProjectData
 				{
 					new GalleryImage {Src = "/art/wrangler.png", Caption= "Team image I made for the 'Data Wranglers'"},
 					new GalleryImage {Src="/art/badger.png", Caption= "Badger Jan"},
-		
 					new GalleryImage {Src="/art/digit.png", Caption= "Digit (DGT)"},
 					new GalleryImage {Src="/art/bison.png", Caption= "Design System Dakota"},
 					new GalleryImage {Src="/art/GPPApotamus_big.png", Caption= "GPPApotamus"},
@@ -72,9 +71,12 @@ public static class StudioProjectData
 			new StudioProject
 			{
 				Title = "Birdsong to MIDI",
-				Tags = new() {new Tag("Tool")},
-				StaticImage="",
-				TechStack="Godot, Drawing pad, FLStudio, Python",
+				Tags = new() {new Tag("Tool"), new Tag("Art")},
+				StaticImage="/art/sonotrace.png",
+				AnimatedGif="/art/sonotrace.gif",
+				Description="An instrument developed to use a Wacom drawing pad-to-MIDI-to-synth workflow",
+				TechStack="Godot, Wacom Drawing pad, FLStudio, Python",
+				StoryPath="/stories/birdsong_midi.md"
 			},
 			new StudioProject 
 			{
@@ -98,10 +100,10 @@ public static class StudioProjectData
 			new StudioProject
 			{
 				Title = "Local Library Genre Analysis",
-				Tags = new() {new Tag("Data")},
-				StaticImage="",
+				Tags = new() {new Tag("Data"), new Tag("AI")},
+				StaticImage="/art/proportion_circ_ya_edit.png",
 				Description="An exploratory analysis of a local library's collection, plus an AI-labeled genre breakdown of its fiction section. Which books actually get borrowed?",
-				TechStack="Python, Gemini",
+				TechStack="Python, Gemini, Pandas",
 				StoryPath="/stories/library_analysis.md"
 			},
 			new StudioProject
@@ -118,7 +120,7 @@ public static class StudioProjectData
 			{
 				Title = "KDE Power Inhibitor",
 				Tags = new() {new Tag("Tool")},
-				StaticImage = "",
+				StaticImage = "/art/kde_inhibitor.png",
 				Description="A tiny set of Linux scripts that keeps your laptop awake while music plays or a DAW is open, without keeping the screen on.",
 				TechStack = "Bash, Manjaro Linux",
 				StoryPath="/stories/kde_power_inhibitor.md"
@@ -154,9 +156,26 @@ public static class StudioProjectData
 			{
 				Title = "Figure Drawing and Painting",
 				Tags = new() {new Tag("Art")},
-				StaticImage="",
+				StaticImage="/art/portrait_2.jpg",
 				Gallery = new()
 				{
+					new GalleryImage {Src = "/art/gouache_2.jpg", Caption= "Gouache on toned sketchbook"},
+					new GalleryImage {Src="/art/oil_figures.jpg", Caption= "Oil on canvas"},
+					new GalleryImage {Src="/art/portrait_2.jpg", Caption= "Charcoal on paper"},
+					new GalleryImage {Src="/art/firefighter.jpg", Caption= "Colored pencil and ink"},
+					new GalleryImage {Src="/art/dancer.jpg", Caption= "Colored ink"},
+					new GalleryImage {Src="/art/baseball_1.jpg", Caption= "Colored pencil"},
+					new GalleryImage {Src="/art/baseball_2.jpg", Caption= "Charcoal"},
+					new GalleryImage {Src="/art/basketball_1.jpg", Caption= "Colored pencil"},
+					new GalleryImage {Src="/art/basketball_2.jpg", Caption= "Colored pencil and ink"},
+					new GalleryImage {Src="/art/fig_1.png", Caption= "Graphite"},
+					new GalleryImage {Src="/art/gestures.jpg", Caption= "Charcoal"},
+					new GalleryImage {Src="/art/gouache_1.jpg", Caption= "Gouache on toned paper"},
+					new GalleryImage {Src="/art/muaythai.jpg", Caption= "Colored pencil and graphite"},
+					new GalleryImage {Src="/art/muaythai_2.jpg", Caption= "Colored pencil and ink"},
+					new GalleryImage {Src="/art/portrait_1.jpg", Caption= "Oil on canvas"},
+					new GalleryImage {Src="/art/smoking.jpg", Caption= "Graphite"},
+					new GalleryImage {Src="/art/wizard.jpg", Caption= "Colored pencil and ink"},
 				},
 				Description="Sketchbooks, box drills, and oil portraits. Practice work, not finished products.",
 				TechStack = "Mixed Media",
@@ -172,12 +191,13 @@ public static class StudioProjectData
 				TechStack="Godot, WebGL",
 				StaticImage="/art/tidebreaker_thumbnail.png",
 				AnimatedGif="/art/tidebreaker-card.gif",
+				StoryPath="/stories/tidebreaker.md",
 			},
 			new StudioProject
 			{
 				Title = "VineScribe: wine note digitizer",
-				Tags = new() {new Tag("Tool")},
-				StaticImage="",
+				Tags = new() {new Tag("Tool"), new Tag("AI")},
+				StaticImage="/art/wine_notebook.jpg",
 				Description = "Email a photo of a handwritten wine tasting note and a Raspberry Pi digitizes it. Email a wine label and it tells you if you've tried it before.",
 				TechStack="Gemini, Gmail, Raspberry Pi, Python",
 				StoryPath="/stories/vinescribe.md"

@@ -15,4 +15,5 @@ keyboard's emoji picker offers.
 
 ## Built Into This Site
 
-Hit the **+** and give it a go! 
+Hit the **+** and give it a go or visit the **Arcade** page!
+

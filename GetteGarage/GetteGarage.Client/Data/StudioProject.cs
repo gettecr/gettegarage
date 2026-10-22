@@ -41,10 +41,11 @@ public static class TagData
 	{
 		["Video Game"] = "#f6a91f", // orange (Primary)
 		["Web"]        = "#cf4024", // burnt red (Secondary)
-		["Art"]        = "#2ecc71", // green (Tertiary)
+		["Art"]        = "#2ecc71", // blue green (Tertiary)
 		["Tool"]       = "#00d9ff", // cyan
 		["Data"]     = "#e91e8c", // magenta
 		["Misc"]     = "#f4d03f", // yellow	
+		["AI"]	     = "#98971A", // yellow green
 	};
 	private const string DefaultHex = "#888888";
 
